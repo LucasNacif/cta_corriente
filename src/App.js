@@ -1,25 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+
+// Importar componentes de páginas
+import Login from './pages/Login';
+import Comprobantes from './pages/Comprobantes';
+import Cuentas from './pages/Cuentas';
+import Movimientos from './pages/Movimientos';
+import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div>
+        {/* Menú de navegación */}
+        <nav>
+          <ul>
+            <Link to="/login">Login</Link>
+            <Link to="/">Dashboard</Link>
+            <Link to="/cuentas">Cuentas</Link>
+            <Link to="/movimientos">Movimientos</Link>
+          </ul>
+        </nav>
+
+        {/* Definición de rutas */}
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/comprobantes" element={<Comprobantes />} />
+          <Route path="/cuentas" element={<Cuentas />} />
+          <Route path="/movimientos" element={<Movimientos />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
