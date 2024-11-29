@@ -1,49 +1,33 @@
-import axios from 'axios';
-import Cookies from 'cookies';
+import api from './axiosConfig'
 
-const apiComprobantes = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://cuentacorrienteproveedores.up.railway.app/api/comprobantes',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// Mostrar todos lo comprobantes
+export const comprobanteApi = {
+    getAll: async () => {
+        const response = await api.get('/comprobantes/mostrar');
+        return response.data;
+    },
 
-apiComprobantes.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error('Error en la API:', error.response || error.message);
-    return Promise.reject(error);
-  }
-);
+    // Mostrar comprobantes por id
+    getById: async (id) => {
+        const response = await api.get(`/comprobantes/mostrar-id/${id}`);
+        return response.data;
+    },
 
+    // Mostrar movimiento por numero de comprobante
+    getByNroComprobante: async (nroComprobante) => {
+        const response = await api.get(`/comprobantes/mostrar-comprobante/${nroComprobante}`);
+        return response.data;
+    },
 
-export const userApi = {
-  getAll: async () => {
-    const response = await apiComprobantes.get('/mostrar'); 
-    return response.data;
-  },
+    // Crear un comprobante
+    save: async (id, userData) => {
+        const response = await api.post('/comprobantes/guardar', userData);
+        return response.data;
+    },
 
-  getById: async (id) => {
-    const response = await apiComprobantes.get(`/mostrar-id/${id}`); 
-    return response.data;
-  },
-
-  getByNroComprobante: async (nroComprobante) => {
-    const response = await apiComprobantes.get(`/mostrar-comprobante/${nroComprobante}`); 
-    return response.data;
-  },
-
-  save: async (id, userData) => {
-    const response = await apiComprobantes.post('/guardar', userData);
-    return response.data;
-  },
-
-  changeState: async (id) => {
-    const response = await apiComprobantes.post(`/cambiar-estado/${id}`); 
-    return response.data;
-  },
+    // Cambiarle el estado a un comprobante
+    changeState: async (id) => {
+        const response = await api.post(`/comprobantes/cambiar-estado/${id}`);
+        return response.data;
+    },
 };
-
-
-
-export default apiComprobantes;
