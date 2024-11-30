@@ -1,6 +1,6 @@
 import api from './axiosConfig'
 
-export const comprobanteApi = {
+export const LoginApi = {
 
     // Metodo de Login
     register: async (userData) => {
@@ -8,7 +8,7 @@ export const comprobanteApi = {
         return response.data;
 
     },
-    // Crear un comprobante
+    // Crear un Usuario
     login: async (userData) => {
         const response = await api.post('/autenticacion/inicio-sesion', userData);
         return response.data;

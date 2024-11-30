@@ -1,38 +1,26 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-
-// Importar componentes de páginas
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import LayoutSidebar from './components/LayoutSidebar';
+import Layout from './components/Layout';
 import Login from './pages/Login';
 import Comprobantes from './pages/Comprobantes';
 import Cuentas from './pages/Cuentas';
 import Movimientos from './pages/Movimientos';
 import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
-function App() {
-  return (
-    <Router>
-      <div>
-        {/* Menú de navegación */}
-        <nav>
-          <ul>
-            <Link to="/login">Login</Link>
-            <Link to="/">Dashboard</Link>
-            <Link to="/cuentas">Cuentas</Link>
-            <Link to="/movimientos">Movimientos</Link>
-          </ul>
-        </nav>
-
-        {/* Definición de rutas */}
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/comprobantes" element={<Comprobantes />} />
-          <Route path="/cuentas" element={<Cuentas />} />
-          <Route path="/movimientos" element={<Movimientos />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
-      </div>
-    </Router>
-  );
-}
+const App = () => {
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<Layout><Login /></Layout>} />
+                <Route path="/dashboard" element={<ProtectedRoute><LayoutSidebar><Dashboard /></LayoutSidebar></ProtectedRoute>} />
+                <Route path="/cuentas" element={<ProtectedRoute><LayoutSidebar><Cuentas /></LayoutSidebar></ProtectedRoute>} />
+                <Route path="/movimientos" element={<ProtectedRoute><LayoutSidebar><Movimientos /></LayoutSidebar></ProtectedRoute>} />
+                <Route path="/comprobantes" element={<ProtectedRoute><LayoutSidebar><Comprobantes /></LayoutSidebar></ProtectedRoute>} />
+            </Routes>
+        </Router>
+    );
+};
 
 export default App;
