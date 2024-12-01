@@ -11,17 +11,15 @@ const Sidebar = () => {
     };
 
     return (
-        <div className="flex min-h-screen">
-            <div className="hidden w-64 flex-col bg-gray-100 p-4 lg:flex">
-                <div className="flex items-center mb-6">
-                    <img src="Logardodeberiairaca.com" alt="Logo" className="h-12 w-12 mr-2" />
-                    <h1 className="text-2xl font-bold">Piezas Ya</h1>
+        <div className="flex h-screen text-emerald-200">
+            <div className="hidden w-64 flex-col bg-gray-100 lg:flex">
+                <div className="flex items-center mb-6 bg-emerald-700 p-2">
+                    <p className="text-xs font-bold text-white">Cta. Corriente Proveedores</p>
+                    <img src="/logo.svg" alt="Logo" className="h-7 w-7 ml-2 text-white" />
                 </div>
+
                 <nav>
                     <ul className="space-y-2">
-                        <li>
-                            <Link to="/" className="block p-2 text-gray-700 hover:bg-gray-200 rounded">Login</Link>
-                        </li>
                         <li>
                             <Link to="/dashboard" className="block p-2 text-gray-700 hover:bg-gray-200 rounded">Dashboard</Link>
                         </li>
@@ -37,8 +35,8 @@ const Sidebar = () => {
                     </ul>
                 </nav>
                 <div className="mt-auto">
-                    <button 
-                        onClick={handleLogout} 
+                    <button
+                        onClick={handleLogout}
                         className="w-full bg-red-500 text-white rounded py-2 mt-4 hover:bg-red-600"
                     >
                         Cerrar Sesión
