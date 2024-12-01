@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LoginApi } from '../api/auth';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
@@ -11,13 +11,20 @@ const Login = () => {
   const [formData, setFormData] = useState({
     name: '',
     surname: '',
+    cuit: '',
     phone: '',
     email: '',
     password: '',
-    cuit: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Verifica si ya hay un token al montar el componente
+  useEffect(() => {
+    if (Cookies.get('token')) {
+      navigate('/dashboard'); // Redirige al dashboard si ya está autenticado
+    }
+  }, [navigate]);
 
   const toggleForm = () => {
     setIsLogin(!isLogin);
@@ -55,21 +62,26 @@ const Login = () => {
           phone: formData.phone,
           password: formData.password
         });
-        console.log('Respuesta de registro:', response); // Log de respuesta
+        console.log('Respuesta de registro:', response);
         setSuccess('Registro exitoso! Ahora puedes iniciar sesión.');
       }
     } catch (error) {
-      console.error('Error en la solicitud:', error); // Log de error
+      console.error('Error en la solicitud:', error);
       setError('Error en la solicitud: ' + (error.response?.data?.message || 'Inténtalo de nuevo.'));
     }
   };
 
   const setToken = (token) => {
     Cookies.set('token', token, {
-      expires: 7, // Expira en 7 días
-      sameSite: 'None', // Permitir el uso en contextos de terceros
-      secure: true // Asegúrate de que la cookie solo se envíe a través de HTTPS
+      expires: 7,
+      sameSite: 'None',
+      secure: true
     });
+  };
+
+  const handleLogout = () => {
+    Cookies.remove('token'); // Elimina el token
+    navigate('/login'); // Redirige al login
   };
 
   return (
@@ -115,12 +127,10 @@ const Login = () => {
             <label className="block text-gray-700">Email</label>
             <input type="email" name="email" value={formData.email} onChange={handleChange} className="border rounded w-full py-2 px-3" required />
           </div>
-          {isLogin && (
-            <div className="mb-4">
-              <label className="block text-gray-700">CUIT</label>
-              <input type="text" name="cuit" value={formData.cuit} onChange={handleChange} className="border rounded w-full py-2 px-3" required />
-            </div>
-          )}
+          <div className="mb-4">
+            <label className="block text-gray-700">CUIT</label>
+            <input type="text" name="cuit" value={formData.cuit} onChange={handleChange} className="border rounded w-full py-2 px-3" required />
+          </div>
           <div className="mb-4">
             <label className="block text-gray-700">Contraseña</label>
             <input type="password" name="password" value={formData.password} onChange={handleChange} className="border rounded w-full py-2 px-3" required />
