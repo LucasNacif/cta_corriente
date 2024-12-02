@@ -7,6 +7,7 @@ import Table from '../components/Table';
 import Input from '../components/Input';
 import Select from '../components/Select';
 import { Plus, Users } from 'lucide-react';
+import ComprobanteManager from '../components/ComprobanteManager'; 
 
 function Movimientos() {
   const [movimientos, setMovimientos] = useState([]);
@@ -17,6 +18,8 @@ function Movimientos() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [movimientoSeleccionado, setMovimientoSeleccionado] = useState(null);
+  const [isComprobanteModalOpen, setIsComprobanteModalOpen] = useState(false);
+  const [selectedMovimientoForComprobante, setSelectedMovimientoForComprobante] = useState(null);
 
   const [importeMovimiento, setImporte] = useState(0);
   const [medioPago, setMedioPago] = useState('EFECTIVO');
@@ -138,7 +141,16 @@ function Movimientos() {
        
         {tipo === 'activo' ? (
           //aca metele el onclick pa abrir el modal
-           <><Button label="Añadir Comprobante" color="blue" /><Button label="Baja" onClick={() => handleCambiarEstado(movimiento.id, 'baja')} color="red" /></>
+           <>
+            <Button
+              label="Añadir Comprobante"
+              color="blue"
+              onClick={() => {
+                setSelectedMovimientoForComprobante(movimiento.id);
+                setIsComprobanteModalOpen(true);
+              }}
+            />
+           <Button label="Baja" onClick={() => handleCambiarEstado(movimiento.id, 'baja')} color="red" /></>
         ) : (
           <Button label="Alta" onClick={() => handleCambiarEstado(movimiento.id, 'alta')} color="green" />
         )}
@@ -189,6 +201,23 @@ function Movimientos() {
             <p>No hay información disponible para este movimiento.</p>
           )}
         </Modal>
+
+        {selectedMovimientoForComprobante && (
+          <Modal
+            isOpen={isComprobanteModalOpen}
+            onClose={() => setIsComprobanteModalOpen(false)}
+            title="Añadir Comprobante"
+            icon={Users}
+          >
+            <ComprobanteManager
+              movimientoId={selectedMovimientoForComprobante}
+              onClose={() => setIsComprobanteModalOpen(false)}
+              onSuccess={() => {
+                // Add any success handling logic
+              }}
+            />
+          </Modal>
+        )}
   
         <Modal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title="Nuevo Movimiento" icon={Users}>
         <form onSubmit={handleCrearMovimiento}>

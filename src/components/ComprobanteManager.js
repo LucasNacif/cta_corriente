@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { comprobanteApi } from '../api/comprobantes'; 
-import Modal from '../components/Modal';
-import Select from '../components/Select';
-import Button from '../components/Button';
-import Input from '../components/Input';
+import Modal from './Modal';
+import Select from './Select';
+import Button from './Button';
+import Input from './Input';
 import { Edit, List, PlusCircle } from 'lucide-react';
 
 const TipoComprobante = {
@@ -15,28 +15,38 @@ const TipoComprobante = {
   TICKET: 'TICKET'
 };
 
-const ComprobanteManager = () => {
+const ComprobanteManager = ({ movimientoId, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     tipoComprobante: '',
     descripcion: '',
     nroComprobante: '',
     fechaComprobante: '',
     montoComprobante: '',
-    movimientoId: ''
+    movimientoId: movimientoId || ''
   });
 
   const [errors, setErrors] = useState({});
   const [comprobantes, setComprobantes] = useState([]);
   const [selectedComprobante, setSelectedComprobante] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isListModalOpen, setIsListModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('create');
+  const [viewMode, setViewMode] = useState('create'); // Default to create mode
+  const [isListView, setIsListView] = useState(false);
+
+  useEffect(() => {
+    // Pre-fill movimientoId if passed as prop
+    if (movimientoId) {
+      setFormData(prevData => ({
+        ...prevData,
+        movimientoId: movimientoId
+      }));
+    }
+  }, [movimientoId]);
 
   const fetchComprobantes = async () => {
     try {
-      const data = await comprobanteApi.getAll();
+      // Always filter by movimientoId
+      const data = await comprobanteApi.getByMovimientoId(movimientoId);
       setComprobantes(data);
-      setIsListModalOpen(true);
+      setIsListView(true);
     } catch (error) {
       console.error('Error fetching comprobantes:', error);
       alert('Error al obtener los comprobantes');
@@ -48,7 +58,6 @@ const ComprobanteManager = () => {
       const data = await comprobanteApi.getById(id);
       setSelectedComprobante(data);
       setViewMode('edit');
-      setIsModalOpen(true);
       
       setFormData({
         tipoComprobante: data.tipoComprobante,
@@ -95,7 +104,7 @@ const ComprobanteManager = () => {
 
     const requiredFields = [
       'tipoComprobante', 'descripcion', 'nroComprobante', 
-      'fechaComprobante', 'montoComprobante', 'movimientoId'
+      'fechaComprobante', 'montoComprobante'
     ];
 
     requiredFields.forEach(field => {
@@ -104,37 +113,52 @@ const ComprobanteManager = () => {
       }
     });
 
+    // Validate movimientoId separately
+    if (!formData.movimientoId) {
+      newErrors.movimientoId = 'ID de Movimiento es obligatorio';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (!validateForm()) {
       return;
     }
-
+    
     try {
       const submissionData = {
         ...formData,
         nroComprobante: Number(formData.nroComprobante),
         montoComprobante: Number(formData.montoComprobante)
       };
-
-      await comprobanteApi.save(null, submissionData);
+      console.log('Datos enviados al API:', submissionData);
       
+      const response = await comprobanteApi.save(null, submissionData);
+      
+      // Reset form
       setFormData({
         tipoComprobante: '',
         descripcion: '',
         nroComprobante: '',
         fechaComprobante: '',
         montoComprobante: '',
-        movimientoId: ''
+        movimientoId: movimientoId || ''
       });
 
-      alert('Comprobante creado exitosamente');
-      setIsModalOpen(false);
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess(response);
+      }
+
+      // Close modal or list if applicable
+      if (onClose) {
+        onClose();
+      }
+
       fetchComprobantes();
     } catch (error) {
       console.error('Error al crear comprobante:', error);
@@ -217,20 +241,22 @@ const ComprobanteManager = () => {
         />
       </div>
 
-      <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2">
-          ID de Movimiento
-        </label>
-        <Input
-          type="text"
-          name="movimientoId"
-          value={formData.movimientoId}
-          onChange={handleChange}
-          error={errors.movimientoId}
-          placeholder="Ingrese ID de movimiento"
-        />
-      </div>
-
+      {/* Hide movimientoId input if passed as prop */}
+      {!movimientoId && (
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            ID de Movimiento
+          </label>
+          <Input
+            type="text"
+            name="movimientoId"
+            value={formData.movimientoId}
+            onChange={handleChange}
+            error={errors.movimientoId}
+            placeholder="Ingrese ID de movimiento"
+          />
+        </div>
+      )}
       <div className="flex items-center justify-center space-x-2">
         <Button 
           type="submit" 
@@ -284,16 +310,10 @@ const ComprobanteManager = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-center mb-4 space-x-2">
-        <Button 
-          onClick={() => {
-            setViewMode('create');
-            setIsModalOpen(true);
-          }}
-          label="Crear Comprobante"
-          icon={PlusCircle}
-          color="green"
-        />
+
+      {/* Render form or list based on state */}
+      {!isListView ? renderForm() : renderComprobantesList()}
+            <div className="flex justify-center mb-4 space-x-2">
         <Button 
           onClick={fetchComprobantes}
           label="Listar Comprobantes"
@@ -301,24 +321,6 @@ const ComprobanteManager = () => {
           color="neutral"
         />
       </div>
-
-      <Modal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={viewMode === 'edit' ? 'Editar Comprobante' : 'Crear Comprobante'}
-        label="Ingrese los detalles del comprobante"
-      >
-        {renderForm()}
-      </Modal>
-
-      <Modal 
-        isOpen={isListModalOpen}
-        onClose={() => setIsListModalOpen(false)}
-        title="Lista de Comprobantes"
-        label="Visualice y gestione sus comprobantes"
-      >
-        {renderComprobantesList()}
-      </Modal>
     </div>
   );
 };
