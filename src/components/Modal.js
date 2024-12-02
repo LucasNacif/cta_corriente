@@ -2,12 +2,11 @@ import React from 'react';
 import Card from './Card';
 import { X } from 'lucide-react';
 
-const Modal = ({ isOpen, onClose, title, label, children }) => {
+const Modal = ({ isOpen, onClose, title, label, className, children }) => {
     if (!isOpen) return null;
-
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-zinc-950 bg-opacity-30">
-            <Card className="relative bg-zinc-200 border-zinc-300 w-11/12 md:w-1/3">
+            <Card className={`relative bg-zinc-200 border-zinc-300 w-11/12 md:w-1/3 ${className}`}>
                 <button
                     className="absolute top-2 right-2  p-2 focus:outline-none"
                     onClick={onClose}

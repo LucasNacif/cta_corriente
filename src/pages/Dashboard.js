@@ -3,32 +3,8 @@ import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import Table from '../components/Table';
 import { obtenerTodosMovimientos } from '../api/movimientos';
-import { DollarSign, ReceiptText, Users } from 'lucide-react';
-
-/* const Badge = ({ children, variant }) => {
-    const variantStyles = {
-        green: 'bg-emerald-200 text-emerald-800',
-        yellow: 'bg-yellow-200 text-yellow-800',
-        blue: 'bg-blue-200 text-blue-800',
-        red: 'bg-red-200 text-red-800',
-        gray: 'bg-gray-200 text-gray-800'
-    };
-
-    return (
-        <span
-            className={`
-          px-2 py-0.5 
-          rounded-full 
-          text-xs 
-          font-medium 
-          ${variantStyles[variant]}
-        `}
-        >
-            {children}
-        </span>
-    );
-}; */
-
+import { DollarSign, ArrowLeftRight, Users } from 'lucide-react';
+import Cookies from 'js-cookie';
 
 export default function Dashboard() {
     const [movimientos, setMovimientos] = useState([]);
@@ -55,41 +31,42 @@ export default function Dashboard() {
         { header: 'Medio de Pago', align: 'text-end' },
     ];
     const [balance] = useState(15000);
+    const userName = Cookies.get('name');
 
     return (
         <div className="container mx-auto">
             <div className='pb-5'>
-                <p className='font-semibold text-lg'>Hola, Lalo!</p>
+                <p className='font-semibold text-2xl'>Hola, {userName}!</p>
                 <p className='text-zinc-500 text-xs'>Este es un resumen de la actividad</p>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <Card className="p-4 border-none bg-gradient-to-t from-monza-500 to-monza-900 text-monza-100">
                     <div className="flex flex-row items-center justify-between pb-2">
-                        <span className="text-sm font-medium">Saldo Actual</span>
+                        <span className="text-sm font-medium">Patrimonio</span>
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div>
-                        <div className="text-3xl font-bold">${balance.toLocaleString()}</div>
+                        <div className="text-4xl font-bold py-3">${balance.toLocaleString()}</div>
                         <p className="text-xs text-gray-200">+20.1% del mes anterior</p>
                     </div>
                 </Card>
-                <Card className='p-4 border-monza-400 bg-monza-200'>
+                <Card className='p-4 border-none bg-gradient-to-t from-blue-500 to-blue-900 text-blue-100'>
                     <div className="flex flex-row items-center justify-between pb-2">
                         <span className="text-sm font-medium">Movimientos Pendientes</span>
-                        <ReceiptText className="h-4 w-4 text-muted-foreground" />
+                        <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold">3</div>
-                        <p className="text-xs text-gray-800">-2 desde el último mes</p>
+                        <div className="text-3xl font-bold py-3">3</div>
+                        <p className="text-xs text-gray-200">-2 desde el último mes</p>
                     </div>
                 </Card>
-                <Card className='p-4 border-monza-400 bg-monza-200'>
+                <Card className='p-4 border-zinc-400'>
                     <div className="flex flex-row items-center justify-between pb-2">
                         <span className="text-sm font-medium">Cuentas Totales</span>
                         <Users className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold">2</div>
+                        <div className="text-3xl font-bold py-3">2</div>
                         <p className="text-xs text-gray-800">Próximo: 15/07/2023</p>
                     </div>
                 </Card>
@@ -118,7 +95,7 @@ export default function Dashboard() {
                 </div>
                 <div className="col-span-3">
                     <h2 className="text-lg font-semibold py-2">Alertas</h2>
-                    <Card className='p-4 min-h-full border-yellow-400'>
+                    <Card className='p-4 min-h-full border-zinc-400/40'>
                         <div className="space-y-4">
                             <div className="flex items-center">
 
@@ -131,25 +108,6 @@ export default function Dashboard() {
                         </div>
                     </Card>
                 </div>
-            </div>
-
-            <div className='pt-3'>
-                <h2 className="text-lg font-semibold py-3 pl-2">Nose</h2>
-                {error ? (
-                    <div className="text-red-500">Error: {error}</div>
-                ) : (
-                    <Table
-                        columns={columns}
-                        data={movimientos}
-                        renderRow={(movimiento) => (
-                            <>
-                                <td className="px-4 py-3">{movimiento.comentarioMovimiento}</td>
-                                <td className="px-4 py-3 text-center">${movimiento.importeMovimiento}</td>
-                                <td className="px-4 py-3 text-end">{movimiento.medioPago}</td>
-                            </>
-                        )}
-                    />
-                )}
             </div>
         </div>
     );
