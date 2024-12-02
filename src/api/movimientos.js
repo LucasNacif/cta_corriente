@@ -3,7 +3,9 @@ import api from './axiosConfig';
 // Crear un movimiento
 export const crearMovimiento = async (movimientoData) => {
   try {
+    console.log(movimientoData)
     const response = await api.post('/movimientos/crear-movimiento', movimientoData);
+    console.log(response)
     return response.data;
   } catch (error) {
     console.error('Error al crear movimiento:', error);

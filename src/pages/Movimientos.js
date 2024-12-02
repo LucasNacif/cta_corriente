@@ -1,261 +1,213 @@
 import React, { useEffect, useState } from 'react';
 import { crearMovimiento, cambiarEstadoMovimiento, obtenerTodosMovimientos, obtenerMovimientoPorId } from '../api/movimientos.js';
+import { verCuentas } from '../api/cuentas.js';
+import Modal from '../components/Modal';
+import Button from '../components/Button';
+import Table from '../components/Table';
+import Input from '../components/Input';
+import Select from '../components/Select';
+import { Plus, Users } from 'lucide-react';
 
 function Movimientos() {
   const [movimientos, setMovimientos] = useState([]);
+  const [movimientosBaja, setMovimientosBaja] = useState([]);
+  const [cuentas, setCuentas] = useState([]);
   const [error, setError] = useState(null);
 
-  // Estado para el movimiento seleccionado
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [movimientoSeleccionado, setMovimientoSeleccionado] = useState(null);
 
-  // Estados para el formulario
-  const [importe, setImporte] = useState('');
+  const [importeMovimiento, setImporte] = useState(0);
   const [medioPago, setMedioPago] = useState('EFECTIVO');
-  const [comentario, setComentario] = useState('');
+  const [comentarioMovimiento, setComentario] = useState('');
   const [cuentaId, setCuentaId] = useState('');
 
-  // Cargar movimientos al montar el componente
+  const [page, setPage] = useState(1); 
+  const [itemsPerPage] = useState(3); 
+
+  const mediosPagoOptions = [
+    { value: 'EFECTIVO', label: 'Efectivo' },
+    { value: 'TRANSFERENCIA_BANCARIA', label: 'Transferencia' },
+    { value: 'TARJETA_DEBITO', label: 'Tarjeta Débito' },
+    { value: 'CHEQUE_CORRIENTE', label: 'Cheque' },
+    { value: 'CHEQUE_DIFERIDO', label: 'Cheque Diferido' },
+    { value: 'PAGARE', label: 'Pagaré' },
+  ];
+
   useEffect(() => {
     const fetchMovimientos = async () => {
       try {
         const data = await obtenerTodosMovimientos();
-        setMovimientos(data);
+
+        //obtengo las cuentas tambien para el select
+        const cuentasData = await verCuentas();
+        setCuentas(cuentasData);
+
+        if (data.length) {
+          setMovimientos(data.filter((mov) => mov.isValid));
+          setMovimientosBaja(data.filter((mov) => !mov.isValid));
+        } else {
+          setError('No se encontraron movimientos.');
+        }
       } catch (error) {
-        setError('Error al obtener los movimientos:', error);
+        setError('Error al obtener los movimientos.');
         console.error(error);
       }
     };
-
     fetchMovimientos();
   }, []);
 
-  // Manejar envío del formulario para crear un movimiento
-  const handleSubmit = async (e) => {
+  const handleCrearMovimiento = async (e) => {
     e.preventDefault();
-
-    const movimientoData = {
-      importeMovimiento: parseFloat(importe),
-      medioPago: medioPago,
-      comentarioMovimiento: comentario,
-      cuentaId: cuentaId,
-    };
-
+    if (!importeMovimiento || !cuentaId) {
+      setError('Debe completar todos los campos requeridos.');
+      return;
+    }
     try {
-      await crearMovimiento(movimientoData);
-      const data = await obtenerTodosMovimientos();
-      setMovimientos(data);
-      setImporte('');
-      setMedioPago('EFECTIVO');
-      setComentario('');
-      setCuentaId('');
+      const response = await crearMovimiento({ importeMovimiento, medioPago, comentarioMovimiento, cuentaId });
+      console.log(response)
+      if (response) {
+        const data = await obtenerTodosMovimientos();
+        setMovimientos(data.filter((mov) => mov.isValid));
+        setMovimientosBaja(data.filter((mov) => !mov.isValid));
+        setIsFormModalOpen(false);
+        setImporte(0);
+        setMedioPago('EFECTIVO');
+        setComentario('');
+        setCuentaId('');
+      } else {
+        setError('No se pudo crear el movimiento.');
+      }
     } catch (error) {
-      setError('Error al crear el movimiento', error.message);
+      setError('Error al crear el movimiento.');
       console.error(error);
     }
   };
 
-  // Función para cambiar el estado de un movimiento
-  const handleChangeEstado = async (id) => {
-    try {
-      await cambiarEstadoMovimiento(id);
-      const data = await obtenerTodosMovimientos();
-      setMovimientos(data);
-    } catch (error) {
-      setError("Error al actualizar el estado del movimiento");
-      console.error(error);
-    }
-  };
-
-  // Función para obtener un movimiento por su ID y mostrarlo en el modal
   const handleVerMovimiento = async (id) => {
     try {
-      const data = await obtenerMovimientoPorId(id);
-      setMovimientoSeleccionado(data);
+      const movimiento = await obtenerMovimientoPorId(id);
+      if (movimiento) {
+        setMovimientoSeleccionado(movimiento);
+        setIsModalOpen(true);
+      } else {
+        setError('Movimiento no encontrado.');
+      }
     } catch (error) {
-      setError('Error al obtener los detalles del movimiento');
+      setError('Error al obtener el movimiento.');
       console.error(error);
     }
   };
 
-  // Filtrar los movimientos activos y dados de baja
-  const movimientosAlta = movimientos.filter((movimiento) => movimiento.isValid);
-  const movimientosBaja = movimientos.filter((movimiento) => !movimiento.isValid);
+  const handleCambiarEstado = async (id, nuevoEstado) => {
+    try {
+      const response = await cambiarEstadoMovimiento(id, nuevoEstado);
+      if (response) {
+        const data = await obtenerTodosMovimientos();
+        setMovimientos(data.filter((mov) => mov.isValid));
+        setMovimientosBaja(data.filter((mov) => !mov.isValid));
+      } else {
+        setError('No se pudo cambiar el estado del movimiento.');
+      }
+    } catch (error) {
+      setError('Error al cambiar el estado del movimiento.');
+      console.error(error);
+    }
+  };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-6">Página de Movimientos</h1>
+   // Paginación para movimientos activos
+   const movimientosActivosPaginados = movimientos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+   const movimientosBajaPaginados = movimientosBaja.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+   
+  const columnas = [
+    { header: 'Comentario', align: 'text-left' },
+    { header: 'Importe', align: 'text-center' },
+    { header: 'Medio de Pago', align: 'text-center' },
+    { header: 'Acciones', align: 'text-end' },
+  ];
 
-      {/* Formulario para crear un movimiento */}
-      <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Crear un Movimiento</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            {/* Formulario de campos */}
-            <div>
-              <label htmlFor="importe" className="block font-medium">Importe:</label>
-              <input
-                type="number"
-                id="importe"
-                value={importe}
-                onChange={(e) => setImporte(e.target.value)}
-                className="w-full p-2 border rounded-md"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="medioPago" className="block font-medium">Medio de Pago:</label>
-              <select
-                id="medioPago"
-                value={medioPago}
-                onChange={(e) => setMedioPago(e.target.value)}
-                className="w-full p-2 border rounded-md"
-              >
-                <option value="EFECTIVO">Efectivo</option>
-                <option value="TRANSFERENCIA">Transferencia</option>
-                <option value="TARJETA_DEBITO">Tarjeta</option>
-                <option value="CHEQUE">Cheque</option>
-                <option value="CHEQUE_DIFERIDO">Cheque diferido</option>
-                <option value="PAGARE">Pagaré</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="comentario" className="block font-medium">Comentario:</label>
-              <input
-                type="text"
-                id="comentario"
-                value={comentario}
-                onChange={(e) => setComentario(e.target.value)}
-                className="w-full p-2 border rounded-md"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="cuentaId" className="block font-medium">Cuenta ID:</label>
-              <input
-                type="text"
-                id="cuentaId"
-                value={cuentaId}
-                onChange={(e) => setCuentaId(e.target.value)}
-                className="w-full p-2 border rounded-md"
-                required
-              />
-            </div>
-
-            <div className="mt-4 text-center">
-              <button type="submit" className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600">
-                Crear Movimiento
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      {/* Tabla de Movimientos Activos */}
-      <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Movimientos Activos</h2>
-        {movimientosAlta.length > 0 ? (
-          <table className="w-full table-auto">
-            <thead>
-              <tr>
-                <th className="px-4 py-2">Comentario</th>
-                <th className="px-4 py-2">Importe</th>
-                <th className="px-4 py-2">Medio de Pago</th>
-                <th className="px-4 py-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {movimientosAlta.map((movimiento) => (
-                <tr key={movimiento.id} className="border-t">
-                  <td className="px-4 py-2">{movimiento.comentarioMovimiento}</td>
-                  <td className="px-4 py-2">${movimiento.importeMovimiento}</td>
-                  <td className="px-4 py-2">{movimiento.medioPago}</td>
-                  <td className="px-4 py-2">
-                    <button
-                      onClick={() => handleChangeEstado(movimiento.id, 'baja')}
-                      className="bg-red-500 text-white py-1 px-4 rounded-md hover:bg-red-600"
-                    >
-                      Baja
-                    </button>
-                    <button
-                      onClick={() => handleVerMovimiento(movimiento.id)}
-                      className="bg-blue-500 text-white py-1 px-4 rounded-md ml-2 hover:bg-blue-600"
-                    >
-                      Ver
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+  const renderRow = (movimiento, tipo) => (
+    <>
+      <td className="px-4 py-3">{movimiento.comentarioMovimiento}</td>
+      <td className="px-4 py-3 text-center">${movimiento.importeMovimiento}</td>
+      <td className="px-4 py-3 text-center">{movimiento.medioPago}</td>
+      <td className="px-4 py-3 flex space-x-2 justify-end">
+        <Button label="Ver" onClick={() => handleVerMovimiento(movimiento.id)} color="neutral" />
+       
+        {tipo === 'activo' ? (
+          //aca metele el onclick pa abrir el modal
+           <><Button label="Añadir Comprobante" color="blue" /><Button label="Baja" onClick={() => handleCambiarEstado(movimiento.id, 'baja')} color="red" /></>
         ) : (
-          <p className="text-center text-gray-500">No hay movimientos activos.</p>
+          <Button label="Alta" onClick={() => handleCambiarEstado(movimiento.id, 'alta')} color="green" />
         )}
-      </div>
-
-      {/* Modal para mostrar los detalles del movimiento */}
-      {movimientoSeleccionado && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
-            <h2 className="text-2xl font-semibold mb-4">Detalles del Movimiento</h2>
-            <p><strong>Importe:</strong> ${movimientoSeleccionado.importeMovimiento}</p>
-            <p><strong>Medio de Pago:</strong> {movimientoSeleccionado.medioPago}</p>
-            <p><strong>Comentario:</strong> {movimientoSeleccionado.comentarioMovimiento}</p>
-            <p><strong>Fecha Alta:</strong> {new Date(movimientoSeleccionado.fechaAltaMovimiento).toLocaleDateString()}</p>
-            <p><strong>Comprobantes:</strong> {movimientoSeleccionado.comprobantes}</p>
-            <div className="mt-4 text-right">
-              <button
-                onClick={() => setMovimientoSeleccionado(null)}
-                className="bg-gray-500 text-white py-2 px-6 rounded-md hover:bg-gray-600"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Movimientos de Baja */}
-      <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Movimientos Dados de Baja</h2>
-        {movimientosBaja.length > 0 ? (
-          <table className="w-full table-auto">
-            <thead>
-              <tr>
-                <th className="px-4 py-2">Comentario</th>
-                <th className="px-4 py-2">Importe</th>
-                <th className="px-4 py-2">Medio de Pago</th>
-                <th className="px-4 py-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {movimientosBaja.map((movimiento) => (
-                <tr key={movimiento.id} className="border-t">
-                  <td className="px-4 py-2">{movimiento.comentarioMovimiento}</td>
-                  <td className="px-4 py-2">${movimiento.importeMovimiento}</td>
-                  <td className="px-4 py-2">{movimiento.medioPago}</td>
-                  <td className="px-4 py-2">
-                    <button
-                      onClick={() => handleChangeEstado(movimiento.id, 'alta')}
-                      className="bg-green-500 text-white py-1 px-4 rounded-md hover:bg-green-600"
-                    >
-                      Alta
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="text-center text-gray-500">No hay movimientos dados de baja.</p>
-        )}
-      </div>
-    </div>
+      </td>
+    </>
   );
-}
+    // Funciones para navegación de páginas
+    const handleNextPage = () => {
+      setPage(page + 1);
+    };
+  
+    const handlePreviousPage = () => {
+      if(page > 1){
+        setPage(page - 1);
+      }
+    };
 
+
+    return (
+      <div className="p-4">
+        <h1 className="text-3xl font-bold text-center mb-6">Movimientos</h1>
+  
+        {error && <p className="text-red-500 text-center">{error}</p>}
+  
+        <Button label="Crear Movimiento" icon={Plus} onClick={() => setIsFormModalOpen(true)} color="green" />
+  
+        <p className="font-normal text-sm mt-4 pb-2">Movimientos Activos</p>
+        <Table columns={columnas} data={movimientosActivosPaginados} renderRow={(mov) => renderRow(mov, 'activo')} />
+  
+        <p className="font-normal text-sm pb-2 mt-6">Movimientos de Baja</p>
+        <Table columns={columnas} data={movimientosBajaPaginados} renderRow={(mov) => renderRow(mov, 'baja')} />
+  
+        {/* Paginación */}
+        <div className="flex justify-between mt-4">
+          <Button label="Anterior" onClick={handlePreviousPage} disabled={page === 1} color="neutral" />
+          <span className="px-4 text-sm text-gray-600">Página {page}</span>
+          <Button label="Siguiente" onClick={handleNextPage} disabled={movimientos.length <= page * itemsPerPage} color="neutral" />
+        </div>
+  
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Movimiento" icon={Users}>
+          {movimientoSeleccionado ? (
+            <div>
+              <p><strong>Comentario:</strong> {movimientoSeleccionado.comentarioMovimiento}</p>
+              <p><strong>Importe:</strong> ${movimientoSeleccionado.importeMovimiento}</p>
+              <p><strong>Medio de Pago:</strong> {movimientoSeleccionado.medioPago}</p>
+            </div>
+          ) : (
+            <p>No hay información disponible para este movimiento.</p>
+          )}
+        </Modal>
+  
+        <Modal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title="Nuevo Movimiento" icon={Users}>
+        <form onSubmit={handleCrearMovimiento}>
+          <Input label="Importe" type="number" value={importeMovimiento} onChange={(e) => setImporte(e.target.value)} />
+          <Select label="Medio de Pago" options={mediosPagoOptions} value={medioPago} onChange={(e) => setMedioPago(e.target.value)} />
+          <Input label="Comentario" type="text" value={comentarioMovimiento} onChange={(e) => setComentario(e.target.value)} />
+          <Select
+            label="Cuenta"
+            options={cuentas && cuentas.length > 0 ? cuentas.map((cuenta) => ({
+              value: cuenta.id,
+              label: cuenta.nombreProveedor
+            })) : []}
+            value={cuentaId}
+            onChange={(e) => setCuentaId(e.target.value)}
+          />
+          <Button className="mt-3" label="Guardar" type="submit" color="green" />
+        </form>
+      </Modal>
+      </div>
+    );
+  }
 export default Movimientos;
