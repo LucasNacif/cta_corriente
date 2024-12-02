@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
 import Table from '../components/Table';
+import Input from '../components/Input';
 import { Users, Plus } from 'lucide-react';
+import Select from '../components/Select';
 
 import { obtenerTodosMovimientos } from '../api/movimientos';
 
@@ -12,7 +14,15 @@ const Componentes = () => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  //Segundo Modal, modal con formulario
+  const [IsFormOpen, setIsFormOpen] = useState(false);
+  const openForm = () => setIsFormOpen(true);
+  const closeForm = () => setIsFormOpen(false);
 
+  //Tercer Modal, modal ver mas
+  const [IsMoreOpen, setIsMoreOpen] = useState(false);
+  const openMore = () => setIsMoreOpen(true);
+  const closeMore = () => setIsMoreOpen(false);
   //Funcionamiento para mostrar datos de api en tabla
   const [movimientos, setMovimientos] = useState([]);
   const [error, setError] = useState(null);
@@ -39,15 +49,26 @@ const Componentes = () => {
     { header: 'Acciones', align: 'text-end' },
   ];
 
+
+  //Para Select
+  const [selectedOption, setSelectedOption] = useState('');
+
+  const options = [
+    { value: '', label: 'Selecciona una opción' },
+    { value: '1', label: 'Opción 1' },
+    { value: '2', label: 'Opción 2' },
+    { value: '3', label: 'Opción 3' },
+  ];
+
   return (
     <div className="p-4">
 
       {/* Uso de Modal*/}
       <p className="font-medium pt-4">Modal</p>
-      <p className="font-normal text-sm pb-2">Usar funciones openModal() y closeModal()</p>
+      <p className="font-normal text-sm pb-2">Usar funciones openModal() y closeModal(). Puede tener title y subtitle</p>
 
       <Button icon={Plus} label="Abrir Modal" onClick={openModal} color="green" />
-      <Modal isOpen={isModalOpen} onClose={closeModal} icon={Users} title="Modal Personalizado" />
+      <Modal isOpen={isModalOpen} onClose={closeModal} icon={Users} title="Modal Personalizado" label="Subtitle" />
 
 
       {/* Uso de Button*/}
@@ -85,9 +106,86 @@ const Componentes = () => {
       )}
 
 
-      {/* Uso del Inputs*/}
+      {/* Uso de Inputs*/}
       <p className="font-medium pt-4">Inputs</p>
-      <p className="font-normal text-sm pb-2">Tamo en eso XD</p>
+      <p className="font-normal text-sm pb-2">Inputs nazis</p>
+
+      <Input label="Nombre" type="text" />
+      <Input label="Teléfono" type="number" />
+      <Input label="Email" type="email" />
+      <Input label="Contraseña" type="password" />
+
+      {/* Uso de Select*/}
+      <p className="font-medium pt-4">Select</p>
+      <p className="font-normal text-sm pb-2">Select nazi</p>
+
+      <Select
+        label="Elige una opción"
+        options={options}
+        value={selectedOption}
+        onChange={(e) => setSelectedOption(e.target.value)}
+      />
+
+      {/* Ejemplo de Modal con Formulario */}
+      <p className="font-medium pt-4">Ejemplo</p>
+      <p className="font-normal text-sm pb-2">Formulario con Modal</p>
+
+      <Button icon={Plus} label="Abrir Modal" onClick={openForm} color="green" />
+      <Modal isOpen={IsFormOpen} onClose={closeForm} icon={Users} title="Fomrulario en Modal" label="Este es un fomrulario de prueba">
+
+        <form className="grid grid-cols-2 space-x-2">
+          <div className='space-y-3'>
+            <Input label="Nombre" type="text" />
+            <Input label="Teléfono" type="number" />
+            <Input label="Email" type="email" />
+          </div>
+          <div className='space-y-3'>
+            <Input label="Cuit" type="text" />
+            <Input label="Contraseña" type="password" />
+            <Select
+              label="Elige una opción"
+              options={options}
+              value={selectedOption}
+              onChange={(e) => setSelectedOption(e.target.value)}
+            />
+          </div>
+          <div className="col-start-2 pt-5">
+            <Button icon={Users} label="Enviar" type="submit" color="neutral" className="w-full" />
+          </div>
+        </form>
+
+      </Modal>
+
+      {/* Ejemplo de Modal Ver Mas */}
+      <p className="font-medium pt-4">Ejemplo</p>
+      <p className="font-normal text-sm pb-2">Modal ver más</p>
+
+      <Button icon={Plus} label="Abrir Modal" onClick={openMore} color="green" />
+      <Modal isOpen={IsMoreOpen} onClose={closeMore} icon={Users} title="Modal ver más" label="Este es un fomrulario de prueba">
+
+        <form className="grid grid-cols-2 space-x-2">
+          <div className='space-y-3'>
+            <Input label="Nombre" type="text" />
+            <Input label="Teléfono" type="number" />
+            <Input label="Email" type="email" />
+          </div>
+          <div className='space-y-3'>
+            <Input label="Cuit" type="text" />
+            <Input label="Contraseña" type="password" />
+            <Select
+              label="Elige una opción"
+              options={options}
+              value={selectedOption}
+              onChange={(e) => setSelectedOption(e.target.value)}
+            />
+          </div>
+          <div className="col-start-2 pt-5">
+            <Button icon={Users} label="Enviar" type="submit" color="neutral" className="w-full" />
+          </div>
+        </form>
+
+      </Modal>
+
     </div>
 
   );

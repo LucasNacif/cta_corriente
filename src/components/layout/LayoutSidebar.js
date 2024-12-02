@@ -7,7 +7,7 @@ const LayoutSidebar = ({ children }) => {
             <div className='fixed top-0 left-0 h-full hidden lg:flex'>
                 <Sidebar />
             </div>
-            <main className='lg:ml-52 m-1 p-6 flex-1 overflow-y-auto bg-monza-100 rounded-xl'>
+            <main className='lg:ml-52 m-1 p-6 flex-1 overflow-y-auto bg-zinc-200 rounded-xl'>
                 <div className='h-full'>
                     {children}
                 </div>

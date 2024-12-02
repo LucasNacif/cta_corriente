@@ -73,7 +73,7 @@ export default function Dashboard() {
                         <p className="text-xs text-gray-200">+20.1% del mes anterior</p>
                     </div>
                 </Card>
-                <Card className='p-4 border-monza-400 bg-monza-300'>
+                <Card className='p-4 border-monza-400 bg-monza-200'>
                     <div className="flex flex-row items-center justify-between pb-2">
                         <span className="text-sm font-medium">Movimientos Pendientes</span>
                         <ReceiptText className="h-4 w-4 text-muted-foreground" />
@@ -83,7 +83,7 @@ export default function Dashboard() {
                         <p className="text-xs text-gray-800">-2 desde el último mes</p>
                     </div>
                 </Card>
-                <Card className='p-4 border-monza-400 bg-monza-300'>
+                <Card className='p-4 border-monza-400 bg-monza-200'>
                     <div className="flex flex-row items-center justify-between pb-2">
                         <span className="text-sm font-medium">Cuentas Totales</span>
                         <Users className="h-4 w-4 text-muted-foreground" />
@@ -118,7 +118,7 @@ export default function Dashboard() {
                 </div>
                 <div className="col-span-3">
                     <h2 className="text-lg font-semibold py-2">Alertas</h2>
-                    <Card className='p-4 min-h-full border-zinc-400/40'>
+                    <Card className='p-4 min-h-full border-yellow-400'>
                         <div className="space-y-4">
                             <div className="flex items-center">
 
