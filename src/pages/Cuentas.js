@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { verCuentas, verCuentaPorId, crearCuenta } from '../api/cuentas';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
+import Badge from '../components/Badge';
 import Table from '../components/Table';
 import Input from '../components/Input';
+import { Plus, Search, ArrowBigRight, ArrowBigLeft } from 'lucide-react';
 
 function Cuentas() {
   const [cuentas, setCuentas] = useState([]);
@@ -67,6 +69,7 @@ function Cuentas() {
       setNumeroCelular('');
       setEmailProveedor('');
       setDireccionProveedor('');
+      setCurrentPage(1); // Resetear a la primera página después de crear una cuenta
     } catch (error) {
       setError('Error al crear la cuenta');
     }
@@ -78,18 +81,11 @@ function Cuentas() {
   const currentItems = cuentas.slice(indexOfFirstItem, indexOfLastItem);
 
   // Cambiar de página
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const columnas = [
-    { header: 'Nombre', align: 'text-left' },
-    { header: 'Proveedor', align: 'text-left' },
-    { header: 'Celular', align: 'text-center' },
-    { header: 'Email', align: 'text-left' },
-    { header: 'Dirección', align: 'text-left' },
-    { header: 'Estado', align: 'text-center' },
-    { header: 'Acciones', align: 'text-end' },
-  ];
-
+  const paginate = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
 
   const getEstadoColor = (estado) => {
     console.log("Estado recibido: ", estado);
@@ -105,18 +101,28 @@ function Cuentas() {
     }
   };
 
+  const columnas = [
+    { header: 'Nombre', align: 'text-left' },
+    { header: 'Proveedor', align: 'text-left' },
+    { header: 'Celular', align: 'text-center' },
+    { header: 'Email', align: 'text-left' },
+    { header: 'Dirección', align: 'text-left' },
+    { header: 'Estado', align: 'text-center' },
+    { header: 'Acciones', align: 'text-end' },
+  ];
+
   const renderRow = (cuenta) => (
     <>
-      <td className="px-4 py-3">{cuenta.name}</td>
-      <td className="px-4 py-3">{cuenta.nombreProveedor}</td>
-      <td className="px-4 py-3 text-center">{cuenta.numeroCelular}</td>
-      <td className="px-4 py-3">{cuenta.emailProveedor}</td>
-      <td className="px-4 py-3">{cuenta.direccionProveedor}</td>
+      <td className="px-4 py-3 text-xs">{cuenta.name}</td>
+      <td className="px-4 py-3 text-sm">{cuenta.nombreProveedor}</td>
+      <td className="px-4 py-3 text-center text-sm">{cuenta.numeroCelular}</td>
+      <td className="px-4 py-3 text-sm">{cuenta.emailProveedor}</td>
+      <td className="px-4 py-3 text-sm">{cuenta.direccionProveedor}</td>
       <td className={`px-2 py-1 text-center`}>
-        <Button label={cuenta.estadoCuenta} color={`${getEstadoColor(cuenta.estadoCuenta)}`} />
+        <Badge label={cuenta.estadoCuenta.toLowerCase()} color={`${getEstadoColor(cuenta.estadoCuenta)}`} />
       </td>
       <td className="px-4 py-3 ">
-        <Button label="Ver" onClick={() => handleVerCuenta(cuenta.id)} color="neutral" />
+        <Button icon={Search} label="Ver" onClick={() => handleVerCuenta(cuenta.id)} color="neutral2" />
       </td>
     </>
   );
@@ -130,17 +136,26 @@ function Cuentas() {
 
       {error && <p className="text-red-500 text-center">{error}</p>}
 
-      <Button label="Crear Cuenta" onClick={() => setIsFormModalOpen(true)} color="green" />
+      <Button icon={Plus} label="Crear Cuenta" onClick={() => setIsFormModalOpen(true)} color="green" />
 
       <Table className="mt-4" columns={columnas} data={currentItems} renderRow={renderRow} />
 
       {/* Paginación */}
-      <div className="flex justify-center mt-4">
-        <Button label="Anterior" onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1} />
-        <span className="mx-2">{currentPage} / {totalPages}</span>
-        <Button label="Siguiente" onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages} />
+      <div className="flex justify-end mt-4">
+        <Button 
+          icon={ArrowBigLeft} 
+          color="neutral2" 
+          onClick={() => paginate(currentPage - 1)} 
+          disabled={currentPage === 1} 
+        />
+        <span className="mx-7 flex items-center text-sm font-extralight">{currentPage} / {totalPages}</span>
+        <Button 
+          icon={ArrowBigRight} 
+          color="neutral2" 
+          onClick={() => paginate(currentPage + 1)} 
+          disabled={currentPage === totalPages || totalPages === 0} // Deshabilitar si es la última página
+        />
       </div>
-
 
       {/* Modal Detalle Cuenta */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Cuenta">

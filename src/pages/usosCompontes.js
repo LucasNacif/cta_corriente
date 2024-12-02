@@ -74,11 +74,25 @@ const Componentes = () => {
       {/* Uso de Button*/}
       <p className="font-medium pt-4">Button</p>
       <p className="font-normal text-sm pb-2">Tiene variables "red", "green" y "neutral". Puede tener o no icons, al igual que label. Utilizar iconos de lucide.dev</p>
-
-      <div className='flex space-x-2'>
-        <Button icon={Plus} onClick={openModal} color="neutral" />
-        <Button icon={Plus} label="red" onClick={openModal} color="red" />
-        <Button icon={Plus} label="green" onClick={openModal} color="green" />
+      <div className='grid grid-cols-3'>
+        <div className='flex space-x-2'>
+          <Button icon={Plus} onClick={openModal} color="neutral" />
+          <Button icon={Plus} label="red" onClick={openModal} color="red" />
+          <Button icon={Plus} label="blue" onClick={openModal} color="blue" />
+          <Button icon={Plus} label="green" onClick={openModal} color="green" />
+        </div>
+        <div className='flex space-x-2'>
+          <Button icon={Plus} onClick={openModal} color="neutral2" />
+          <Button icon={Plus} label="red" onClick={openModal} color="red2" />
+          <Button icon={Plus} label="blue" onClick={openModal} color="blue2" />
+          <Button icon={Plus} label="green" onClick={openModal} color="green2" />
+        </div>
+        <div className='flex space-x-2'>
+          <Button icon={Plus} onClick={openModal} color="neutral3" />
+          <Button icon={Plus} label="red" onClick={openModal} color="red3" />
+          <Button icon={Plus} label="blue" onClick={openModal} color="blue3" />
+          <Button icon={Plus} label="green" onClick={openModal} color="green3" />
+        </div>
       </div>
 
 

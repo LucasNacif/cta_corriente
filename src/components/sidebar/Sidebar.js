@@ -9,8 +9,14 @@ const Sidebar = () => {
 
     const handleLogout = () => {
         Cookies.remove('token');
+        Cookies.remove('name');
+        Cookies.remove('surname');
+        Cookies.remove('email');
         navigate('/');
     };
+    const userName = Cookies.get('name');
+    const userSurname = Cookies.get('surname');
+    const userEmail = Cookies.get('email');
 
     return (
         <div className="flex h-screen text-monza-200">
@@ -43,8 +49,8 @@ const Sidebar = () => {
                     <div className="text-sm text-white">
                         {/* <p>{user.name}</p>
                         <p>{user.email}</p> */}
-                        <p className='text-sm font-semibold'>Lalo Landa</p>
-                        <p className='text-xs text-monza-300'>lalo@gmail.com</p>
+                        <p className='text-sm font-semibold'>{userSurname}, {userName}</p>
+                        <p className='text-xs text-monza-300'>{userEmail}</p>
                     </div>
                     <button
                         onClick={handleLogout}
