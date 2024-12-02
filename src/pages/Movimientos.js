@@ -18,16 +18,16 @@ function Movimientos() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [movimientoSeleccionado, setMovimientoSeleccionado] = useState(null);
 
-  const [importe, setImporte] = useState('');
+  const [importeMovimiento, setImporte] = useState(0);
   const [medioPago, setMedioPago] = useState('EFECTIVO');
-  const [comentario, setComentario] = useState('');
+  const [comentarioMovimiento, setComentario] = useState('');
   const [cuentaId, setCuentaId] = useState('');
 
   const mediosPagoOptions = [
     { value: 'EFECTIVO', label: 'Efectivo' },
-    { value: 'TRANSFERENCIA', label: 'Transferencia' },
+    { value: 'TRANSFERENCIA_BANCARIA', label: 'Transferencia' },
     { value: 'TARJETA_DEBITO', label: 'Tarjeta Débito' },
-    { value: 'CHEQUE', label: 'Cheque' },
+    { value: 'CHEQUE_CORRIENTE', label: 'Cheque' },
     { value: 'CHEQUE_DIFERIDO', label: 'Cheque Diferido' },
     { value: 'PAGARE', label: 'Pagaré' },
   ];
@@ -57,19 +57,19 @@ function Movimientos() {
 
   const handleCrearMovimiento = async (e) => {
     e.preventDefault();
-    if (!importe || !cuentaId) {
+    if (!importeMovimiento || !cuentaId) {
       setError('Debe completar todos los campos requeridos.');
       return;
     }
     try {
-      const response = await crearMovimiento({ importe, medioPago, comentario, cuentaId });
+      const response = await crearMovimiento({ importeMovimiento, medioPago, comentarioMovimiento, cuentaId });
       console.log(response)
       if (response) {
         const data = await obtenerTodosMovimientos();
         setMovimientos(data.filter((mov) => mov.isValid));
         setMovimientosBaja(data.filter((mov) => !mov.isValid));
         setIsFormModalOpen(false);
-        setImporte('');
+        setImporte(0);
         setMedioPago('EFECTIVO');
         setComentario('');
         setCuentaId('');
@@ -168,9 +168,9 @@ function Movimientos() {
 
       <Modal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title="Nuevo Movimiento" icon={Users}>
         <form onSubmit={handleCrearMovimiento}>
-          <Input label="Importe" type="number" value={importe} onChange={(e) => setImporte(e.target.value)} />
+          <Input label="Importe" type="number" value={importeMovimiento} onChange={(e) => setImporte(e.target.value)} />
           <Select label="Medio de Pago" options={mediosPagoOptions} value={medioPago} onChange={(e) => setMedioPago(e.target.value)} />
-          <Input label="Comentario" type="text" value={comentario} onChange={(e) => setComentario(e.target.value)} />
+          <Input label="Comentario" type="text" value={comentarioMovimiento} onChange={(e) => setComentario(e.target.value)} />
 
           {/* Aquí mostramos las cuentas disponibles en el Select */}
           <Select
