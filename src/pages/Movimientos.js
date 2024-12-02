@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { crearMovimiento, cambiarEstadoMovimiento, obtenerTodosMovimientos, obtenerMovimientoPorId } from '../api/movimientos.js';
+import { verCuentas } from '../api/cuentas.js';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
 import Table from '../components/Table';
@@ -10,20 +11,18 @@ import { Plus, Users } from 'lucide-react';
 function Movimientos() {
   const [movimientos, setMovimientos] = useState([]);
   const [movimientosBaja, setMovimientosBaja] = useState([]);
+  const [cuentas, setCuentas] = useState([]);
   const [error, setError] = useState(null);
 
-  // Estados para modales
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [movimientoSeleccionado, setMovimientoSeleccionado] = useState(null);
 
-  // Estados para el formulario
   const [importe, setImporte] = useState('');
   const [medioPago, setMedioPago] = useState('EFECTIVO');
   const [comentario, setComentario] = useState('');
   const [cuentaId, setCuentaId] = useState('');
 
-  // Opciones del select
   const mediosPagoOptions = [
     { value: 'EFECTIVO', label: 'Efectivo' },
     { value: 'TRANSFERENCIA', label: 'Transferencia' },
@@ -37,10 +36,19 @@ function Movimientos() {
     const fetchMovimientos = async () => {
       try {
         const data = await obtenerTodosMovimientos();
-        setMovimientos(data.filter((mov) => mov.isValid)); // Movimientos activos
-        setMovimientosBaja(data.filter((mov) => !mov.isValid)); // Movimientos de baja
+
+        //obtengo las cuentas tambien para el select
+        const cuentasData = await verCuentas();
+        setCuentas(cuentasData);
+
+        if (data.length) {
+          setMovimientos(data.filter((mov) => mov.isValid));
+          setMovimientosBaja(data.filter((mov) => !mov.isValid));
+        } else {
+          setError('No se encontraron movimientos.');
+        }
       } catch (error) {
-        setError('Error al obtener los movimientos');
+        setError('Error al obtener los movimientos.');
         console.error(error);
       }
     };
@@ -49,18 +57,26 @@ function Movimientos() {
 
   const handleCrearMovimiento = async (e) => {
     e.preventDefault();
+    if (!importe || !cuentaId) {
+      setError('Debe completar todos los campos requeridos.');
+      return;
+    }
     try {
-      await crearMovimiento({ importe, medioPago, comentario, cuentaId });
-      const data = await obtenerTodosMovimientos();
-      setMovimientos(data.filter((mov) => mov.isValid));
-      setMovimientosBaja(data.filter((mov) => !mov.isValid));
-      setIsFormModalOpen(false);
-      setImporte('');
-      setMedioPago('EFECTIVO');
-      setComentario('');
-      setCuentaId('');
+      const response = await crearMovimiento({ importe, medioPago, comentario, cuentaId });
+      if (response) {
+        const data = await obtenerTodosMovimientos();
+        setMovimientos(data.filter((mov) => mov.isValid));
+        setMovimientosBaja(data.filter((mov) => !mov.isValid));
+        setIsFormModalOpen(false);
+        setImporte('');
+        setMedioPago('EFECTIVO');
+        setComentario('');
+        setCuentaId('');
+      } else {
+        setError('No se pudo crear el movimiento.');
+      }
     } catch (error) {
-      setError('Error al crear el movimiento');
+      setError('Error al crear el movimiento.');
       console.error(error);
     }
   };
@@ -68,22 +84,30 @@ function Movimientos() {
   const handleVerMovimiento = async (id) => {
     try {
       const movimiento = await obtenerMovimientoPorId(id);
-      setMovimientoSeleccionado(movimiento);
-      setIsModalOpen(true);
+      if (movimiento) {
+        setMovimientoSeleccionado(movimiento);
+        setIsModalOpen(true);
+      } else {
+        setError('Movimiento no encontrado.');
+      }
     } catch (error) {
-      setError('Error al obtener el movimiento');
+      setError('Error al obtener el movimiento.');
       console.error(error);
     }
   };
 
   const handleCambiarEstado = async (id, nuevoEstado) => {
     try {
-      await cambiarEstadoMovimiento(id, nuevoEstado);
-      const data = await obtenerTodosMovimientos();
-      setMovimientos(data.filter((mov) => mov.isValid));
-      setMovimientosBaja(data.filter((mov) => !mov.isValid));
+      const response = await cambiarEstadoMovimiento(id, nuevoEstado);
+      if (response) {
+        const data = await obtenerTodosMovimientos();
+        setMovimientos(data.filter((mov) => mov.isValid));
+        setMovimientosBaja(data.filter((mov) => !mov.isValid));
+      } else {
+        setError('No se pudo cambiar el estado del movimiento.');
+      }
     } catch (error) {
-      setError('Error al cambiar el estado');
+      setError('Error al cambiar el estado del movimiento.');
       console.error(error);
     }
   };
@@ -119,33 +143,43 @@ function Movimientos() {
 
       <Button label="Crear Movimiento" icon={Plus} onClick={() => setIsFormModalOpen(true)} color="green" />
 
-      {/* Tabla de Movimientos Activos */}
       <p className="font-normal text-sm mt-4 pb-2">Movimientos Activos</p>
       <Table columns={columnas} data={movimientos} renderRow={(mov) => renderRow(mov, 'activo')} />
 
-      {/* Tabla de Movimientos de Baja */}
       <p className="font-normal text-sm pb-2 mt-6">Movimientos de Baja</p>
       <Table columns={columnas} data={movimientosBaja} renderRow={(mov) => renderRow(mov, 'baja')} />
 
-      {/* Modal de Detalle */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Movimiento" icon={Users}>
-        {movimientoSeleccionado && (
+        {movimientoSeleccionado ? (
           <div>
             <p><strong>Comentario:</strong> {movimientoSeleccionado.comentarioMovimiento}</p>
             <p><strong>Importe:</strong> ${movimientoSeleccionado.importeMovimiento}</p>
             <p><strong>Medio de Pago:</strong> {movimientoSeleccionado.medioPago}</p>
           </div>
+        ) : (
+          <p>No hay información disponible para este movimiento.</p>
         )}
       </Modal>
 
-      {/* Modal de Nuevo Movimiento */}
       <Modal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title="Nuevo Movimiento" icon={Users}>
         <form onSubmit={handleCrearMovimiento}>
           <Input label="Importe" type="number" value={importe} onChange={(e) => setImporte(e.target.value)} />
           <Select label="Medio de Pago" options={mediosPagoOptions} value={medioPago} onChange={(e) => setMedioPago(e.target.value)} />
           <Input label="Comentario" type="text" value={comentario} onChange={(e) => setComentario(e.target.value)} />
-          <Input label="Cuenta ID" type="text" value={cuentaId} onChange={(e) => setCuentaId(e.target.value)} />
-          <Button label="Guardar" type="submit" color="green" />
+
+          {/* Aquí mostramos las cuentas disponibles en el Select */}
+          <Select
+            label="Cuenta"
+            options={cuentas && cuentas.length > 0 ? cuentas.map((cuenta) => ({
+              value: cuenta.id,
+              label: cuenta.nombreProveedor
+            })) : []}
+            value={cuentaId}
+            onChange={(e) => setCuentaId(e.target.value)}
+          />
+
+
+          <Button className="mt-3" label="Guardar" type="submit" color="green" />
         </form>
       </Modal>
     </div>

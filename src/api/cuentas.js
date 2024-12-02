@@ -2,7 +2,7 @@ import api from './axiosConfig';
 
 export const crearCuenta = async (data) => {
     try {
-        const response = await api.post('/api/cuentas/crear-cuenta', data, {
+        const response = await api.post('/cuentas/crear-cuenta', data, {
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -16,7 +16,7 @@ export const crearCuenta = async (data) => {
 
 export const cambiarEstadoCuenta = async (idCuenta) => {
     try {
-        const response = await api.post(`/api/cuentas/cambiar-estado/${idCuenta}`);
+        const response = await api.post(`/cuentas/cambiar-estado/${idCuenta}`);
         console.log('Estado de la cuenta actualizado:', response.data);
         return response.data; // Retorna la respuesta al llamador
     } catch (error) {
@@ -27,7 +27,7 @@ export const cambiarEstadoCuenta = async (idCuenta) => {
 
 export const verCuentas = async () => {
     try {
-        const response = await api.get('/api/cuentas/ver-cuentas');
+        const response = await api.get('/cuentas/ver-cuentas');
         console.log('Cuentas:', response.data);
         return response.data; // Aquí se retorna la data obtenida
     } catch (error) {
@@ -38,7 +38,7 @@ export const verCuentas = async () => {
 
 export const verCuentaPorId = async (id) => {
     try {
-        const response = await api.get(`/api/cuentas/ver-cuenta-id/${id}`);
+        const response = await api.get(`/cuentas/ver-cuenta-id/${id}`);
         console.log('Cuenta:', response.data);
         return response.data;
     } catch (error) {
