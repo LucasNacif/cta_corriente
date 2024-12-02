@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link , Navigate} from 'react-router-dom';
 
 // Importar componentes de páginas
 import Login from './pages/Login';
@@ -19,6 +19,7 @@ function App() {
             <Link to="/">Dashboard</Link>
             <Link to="/cuentas">Cuentas</Link>
             <Link to="/movimientos">Movimientos</Link>
+            <Link to="/comprobantes">Comprobantes</Link>
           </ul>
         </nav>
 
@@ -29,6 +30,9 @@ function App() {
           <Route path="/cuentas" element={<Cuentas />} />
           <Route path="/movimientos" element={<Movimientos />} />
           <Route path="/dashboard" element={<Dashboard />} />
+
+                  {/* Redirección por defecto
+        <Route path="*" element={<Navigate to="/" replace />} /> */}
         </Routes>
       </div>
     </Router>
