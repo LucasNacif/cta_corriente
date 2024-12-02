@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Cuentas from './pages/Cuentas';
 import Movimientos from './pages/Movimientos';
 import Dashboard from './pages/Dashboard';
+import Comprobantes from './pages/ComprobantesForm'
 import Componentes from './pages/usosCompontes'
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
@@ -18,6 +19,7 @@ const App = () => {
                 <Route path="/cuentas" element={<ProtectedRoute><LayoutSidebar><Cuentas /></LayoutSidebar></ProtectedRoute>} />
                 <Route path="/movimientos" element={<ProtectedRoute><LayoutSidebar><Movimientos /></LayoutSidebar></ProtectedRoute>} />
                 <Route path="/usocomponents" element={<ProtectedRoute><LayoutSidebar><Componentes /></LayoutSidebar></ProtectedRoute>} />
+                <Route path="/comprobantes" element={<Comprobantes/>} />
             </Routes>
         </Router>
     );
