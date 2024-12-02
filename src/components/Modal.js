@@ -11,13 +11,13 @@ const Modal = ({ isOpen, onClose, title, label, className, children }) => {
                     className="absolute top-2 right-2  p-2 focus:outline-none"
                     onClick={onClose}
                 >
-                    <X className='w-4 h-auto' />
+                    <X className='w-4 h-auto hover:text-gray-500' />
                 </button>
-                <div className='my-3'>
+                <div className='py-5 px-2'>
                     <h2 className="text-lg font-medium ml-4 text-zinc-800">{title}</h2>
                     <p className='text-sm font-light ml-4 text-zinc-500'>{label}</p>
                 </div>
-                <div className='px-4 pb-4'>
+                <div className='px-6 pb-4'>
                     {children}
                 </div>
             </Card>

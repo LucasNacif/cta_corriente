@@ -142,23 +142,23 @@ function Cuentas() {
 
       {/* Paginación */}
       <div className="flex justify-end mt-4">
-        <Button 
-          icon={ArrowBigLeft} 
-          color="neutral2" 
-          onClick={() => paginate(currentPage - 1)} 
-          disabled={currentPage === 1} 
+        <Button
+          icon={ArrowBigLeft}
+          color="neutral2"
+          onClick={() => paginate(currentPage - 1)}
+          disabled={currentPage === 1}
         />
         <span className="mx-7 flex items-center text-sm font-extralight">{currentPage} / {totalPages}</span>
-        <Button 
-          icon={ArrowBigRight} 
-          color="neutral2" 
-          onClick={() => paginate(currentPage + 1)} 
+        <Button
+          icon={ArrowBigRight}
+          color="neutral2"
+          onClick={() => paginate(currentPage + 1)}
           disabled={currentPage === totalPages || totalPages === 0} // Deshabilitar si es la última página
         />
       </div>
 
       {/* Modal Detalle Cuenta */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Cuenta">
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Cuenta" label="Resumen de la cuenta">
         {cuentaSeleccionada && (
           <div>
             <p><strong>Nombre:</strong> {cuentaSeleccionada.name}</p>
@@ -201,39 +201,44 @@ function Cuentas() {
       </Modal>
 
       {/* Modal Crear Cuenta */}
-      <Modal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title="Crear Nueva Cuenta">
-        <form onSubmit={handleCrearCuenta}>
-          <Input
-            label="Nombre de la Cuenta"
-            type="text"
-            value={nombreCuenta}
-            onChange={(e) => setNombreCuenta(e.target.value)}
-          />
-          <Input
-            label="Nombre del Proveedor"
-            type="text"
-            value={nombreProveedor}
-            onChange={(e) => setNombreProveedor(e.target.value)}
-          />
-          <Input
-            label="Número de Celular"
-            type="text"
-            value={numeroCelular}
-            onChange={(e) => setNumeroCelular(e.target.value)}
-          />
-          <Input
-            label="Email del Proveedor"
-            type="email"
-            value={emailProveedor}
-            onChange={(e) => setEmailProveedor(e.target.value)}
-          />
-          <Input
-            label="Dirección del Proveedor"
-            type="text"
-            value={direccionProveedor}
-            onChange={(e) => setDireccionProveedor(e.target.value)}
-          />
-          <Button label="Guardar" type="submit" color="green" />
+      <Modal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title="Crear Nueva Cuenta" label="Ingrese los datos de la cuenta">
+        <form className="pt-4" onSubmit={handleCrearCuenta}>
+          <div className='grid grid-cols-1 space-y-3'>
+            <Input
+              label="Nombre de la Cuenta"
+              type="text"
+              value={nombreCuenta}
+              onChange={(e) => setNombreCuenta(e.target.value)}
+            />
+            <Input
+              label="Nombre del Proveedor"
+              type="text"
+              value={nombreProveedor}
+              onChange={(e) => setNombreProveedor(e.target.value)}
+            />
+            <Input
+              label="Número de Celular"
+              type="text"
+              value={numeroCelular}
+              onChange={(e) => setNumeroCelular(e.target.value)}
+            />
+            <Input
+              label="Email del Proveedor"
+              type="email"
+              value={emailProveedor}
+              onChange={(e) => setEmailProveedor(e.target.value)}
+            />
+            <Input
+              label="Dirección del Proveedor"
+              type="text"
+              value={direccionProveedor}
+              onChange={(e) => setDireccionProveedor(e.target.value)}
+            />
+          </div>
+          <div className="pt-5 justify-between flex space-x-10 w-full">
+            <Button label="Cancelar" onClick={() => setIsFormModalOpen(false)} color="red3" className="mt-3 w-full" />
+            <Button label="Guardar" type="submit" color="green" className="mt-3 w-full" />
+          </div>
         </form>
       </Modal>
     </div>

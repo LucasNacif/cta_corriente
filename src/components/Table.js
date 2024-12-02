@@ -1,33 +1,40 @@
-import React from 'react';
-import Card from './Card';
+import React from "react";
+import Card from "./Card";
 
 const Table = ({ columns, data, renderRow, className }) => {
     return (
-        <Card className={`border-zinc-400/40 min-h-full ${className}`}>
-            <table className="min-w-full">
-                <thead className="text-xs">
-                    <tr>
-                        {columns.map((col, index) => (
-                            <th
-                                key={index}
-                                className={`px-4 pb-2 pt-4 ${col.align} font-light`}
-                            >
-                                {col.header}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody className="text-sm">
-                    {data.map((item, index) => (
-                        <tr
-                            key={index}
-                            className="shadow-sm rounded-lg hover:bg-monza-200/40 transition-colors text-sm odd:bg-zinc-300/50"
-                        >
-                            {renderRow(item, index)}
+        <Card className={`border-none min-h-full ${className}`}>
+            <div className="relative overflow-x-auto shadow-md sm:rounded-md">
+                <table className="w-full text-sm text-left rtl:text-right text-zinc-500 dark:text-gray-400">
+                    <thead className="text-zinc-700 uppercase bg-zinc-300">
+                        <tr>
+                            {columns.map((col, index) => (
+                                <th
+                                    key={index}
+                                    scope="col"
+                                    className={`${col.align} font-semibold text-xs px-6 py-3`}
+                                >
+                                    {col.header}
+                                </th>
+                            ))}
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {data.map((item, index) => (
+                            <tr
+                                key={index}
+                                className={`bg-zinc-100 text-zinc-800 ${
+                                    index !== data.length - 1
+                                        ? "border-b border-zinc-300"
+                                        : ""
+                                }`}
+                            >
+                                {renderRow(item, index)}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </Card>
     );
 };
