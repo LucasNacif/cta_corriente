@@ -10,7 +10,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-red-900 to-gray-900">
-      {/* Logo con texto */}
       <div className="text-center mb-6">
         <img
           src="/logo.png"
@@ -40,7 +39,7 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Formulario dinámico */}
+          {/* Formularios */}
           {isLogin ? <LoginForm /> : <RegisterForm />}
         </div>
         <Footer />
