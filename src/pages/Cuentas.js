@@ -19,6 +19,10 @@ function Cuentas() {
   const [emailProveedor, setEmailProveedor] = useState('');
   const [direccionProveedor, setDireccionProveedor] = useState('');
 
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(4);
+
   useEffect(() => {
     const fetchCuentas = async () => {
       try {
@@ -68,6 +72,14 @@ function Cuentas() {
     }
   };
 
+  // Paginación: Calcular las cuentas a mostrar en la página actual
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = cuentas.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Cambiar de página
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   const columnas = [
     { header: 'Nombre', align: 'text-left' },
     { header: 'Proveedor', align: 'text-left' },
@@ -109,6 +121,9 @@ function Cuentas() {
     </>
   );
 
+  // Número de páginas
+  const totalPages = Math.ceil(cuentas.length / itemsPerPage);
+
   return (
     <div className="p-4">
       <h1 className="text-3xl font-bold text-center mb-6">Cuentas</h1>
@@ -117,7 +132,15 @@ function Cuentas() {
 
       <Button label="Crear Cuenta" onClick={() => setIsFormModalOpen(true)} color="green" />
 
-      <Table className="mt-4" columns={columnas} data={cuentas} renderRow={renderRow} />
+      <Table className="mt-4" columns={columnas} data={currentItems} renderRow={renderRow} />
+
+      {/* Paginación */}
+      <div className="flex justify-center mt-4">
+        <Button label="Anterior" onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1} />
+        <span className="mx-2">{currentPage} / {totalPages}</span>
+        <Button label="Siguiente" onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages} />
+      </div>
+
 
       {/* Modal Detalle Cuenta */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Cuenta">
