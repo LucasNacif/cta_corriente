@@ -1,139 +1,50 @@
-"use client"
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { LoginApi } from '../api/auth';
-import Cookies from 'js-cookie';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react'
+import LoginForm from '../components/login/LoginForm'
+import RegisterForm from '../components/login/RegisterForm'
+import Footer from '../components/login/footer'
 
-const Login = () => {
-  const navigate = useNavigate();
+export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    name: '',
-    surname: '',
-    cuit: '',
-    phone: '',
-    email: '',
-    password: '',
-  });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  useEffect(() => {
-    if (Cookies.get('token')) {
-      navigate('/dashboard');
-    }
-  }, [navigate]);
-
-  const toggleForm = () => {
-    setIsLogin(!isLogin);
-    setError('');
-    setSuccess('');
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    try {
-      if (isLogin) {
-        const response = await LoginApi.login({
-          email: formData.email,
-          cuit: formData.cuit,
-          password: formData.password
-        });
-        console.log('Respuesta de inicio de sesión:', response); 
-        setToken(response);
-        setSuccess('Inicio de sesión exitoso!');
-        navigate('/dashboard');
-      } else {
-        const response = await LoginApi.register({
-          name: formData.name,
-          surname: formData.surname,
-          cuit: formData.cuit,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password
-        });
-        console.log('Respuesta de registro:', response);
-        setSuccess('Registro exitoso! Ahora puedes iniciar sesión.');
-      }
-    } catch (error) {
-      console.error('Error en la solicitud:', error);
-      setError('Error en la solicitud: ' + (error.response?.data?.message || 'Inténtalo de nuevo.'));
-    }
-  };
-
-  const setToken = (response) => {
-    Cookies.set('token', response.token, {
-      expires: 7,
-      sameSite: 'None',
-      secure: true
-    });
-  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-md rounded-lg p-6 w-96">
-        <h2 className="text-2xl font-bold text-center mb-4">{isLogin ? 'Iniciar Sesión' : 'Registrarse'}</h2>
-        <div className="flex justify-around mb-4">
-          <button
-            className={`w-1/2 py-2 rounded ${isLogin ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-            onClick={toggleForm}
-          >
-            Ingresar
-          </button>
-          <button
-            className={`w-1/2 py-2 rounded ${!isLogin ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-            onClick={toggleForm}
-          >
-            Registrarse
-          </button>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-red-900 to-gray-900">
+      {/* Logo con texto */}
+      <div className="text-center mb-6">
+        <img
+          src="/logo.png"
+          alt="Logo"
+          className="w-20 h-20 mx-auto"
+        />
+        <h1 className="text-2xl font-bold text-white mt-3">Piezas Ya</h1>
+      </div>
+
+      <div className="w-full max-w-sm">
+        <div className="bg-gray-100 rounded-xl shadow-md p-6 mb-6 border border-gray-700 text-white">
+          {/* Botones de Login y Register */}
+          <div className="flex mb-4">
+            <button
+              className={`flex-1 py-2 text-center ${isLogin ? 'bg-gradient-to-br from-red-500 to-red-700 text-white' : 'bg-gray-700 text-gray-300'
+                } rounded-tl-lg rounded-bl-lg font-semibold transition duration-300 text-sm`}
+              onClick={() => setIsLogin(true)}
+            >
+              Login
+            </button>
+            <button
+              className={`flex-1 py-2 text-center ${!isLogin ? 'bg-gradient-to-br from-red-500 to-red-700 text-white' : 'bg-gray-700 text-gray-300'
+                } rounded-tr-lg rounded-br-lg font-semibold transition duration-300 text-sm`}
+              onClick={() => setIsLogin(false)}
+            >
+              Register
+            </button>
+          </div>
+
+          {/* Formulario dinámico */}
+          {isLogin ? <LoginForm /> : <RegisterForm />}
         </div>
-
-        {error && <p className="text-red-500 text-center">{error}</p>}
-        {success && <p className="text-green-500 text-center">{success}</p>}
-
-        <form onSubmit={handleSubmit}>
-          {!isLogin && (
-            <>
-              <div className="mb-4">
-                <label className="block text-gray-700">Nombre</label>
-                <input type="text" name="name" value={formData.name} onChange={handleChange} className="border rounded w-full py-2 px-3" required />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700">Apellido</label>
-                <input type="text" name="surname" value={formData.surname} onChange={handleChange} className="border rounded w-full py-2 px-3" required />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700">Teléfono</label>
-                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="border rounded w-full py-2 px-3" required />
-              </div>
-            </>
-          )}
-          <div className="mb-4">
-            <label className="block text-gray-700">Email</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} className="border rounded w-full py-2 px-3" required />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">CUIT</label>
-            <input type="text" name="cuit" value={formData.cuit} onChange={handleChange} className="border rounded w-full py-2 px-3" required />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Contraseña</label>
-            <input type="password" name="password" value={formData.password} onChange={handleChange} className="border rounded w-full py-2 px-3" required />
-          </div>
-          <button type="submit" className="bg-blue-500 text-white rounded w-full py-2">{isLogin ? 'Iniciar Sesión' : 'Registrarse'}</button>
-        </form>
+        <Footer />
       </div>
     </div>
   );
-};
-
-export default Login;
+}
