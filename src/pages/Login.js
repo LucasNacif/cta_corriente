@@ -19,10 +19,9 @@ const Login = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Verifica si ya hay un token al montar el componente
   useEffect(() => {
     if (Cookies.get('token')) {
-      navigate('/dashboard'); // Redirige al dashboard si ya está autenticado
+      navigate('/dashboard');
     }
   }, [navigate]);
 
@@ -50,7 +49,7 @@ const Login = () => {
           password: formData.password
         });
         console.log('Respuesta de inicio de sesión:', response); 
-        setToken(response.token);
+        setToken(response);
         setSuccess('Inicio de sesión exitoso!');
         navigate('/dashboard');
       } else {
@@ -71,17 +70,12 @@ const Login = () => {
     }
   };
 
-  const setToken = (token) => {
-    Cookies.set('token', token, {
+  const setToken = (response) => {
+    Cookies.set('token', response.token, {
       expires: 7,
       sameSite: 'None',
       secure: true
     });
-  };
-
-  const handleLogout = () => {
-    Cookies.remove('token'); // Elimina el token
-    navigate('/login'); // Redirige al login
   };
 
   return (

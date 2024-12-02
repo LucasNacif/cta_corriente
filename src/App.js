@@ -1,13 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import LayoutSidebar from './components/LayoutSidebar';
-import Layout from './components/Layout';
+import LayoutSidebar from './components/layout/LayoutSidebar';
+import Layout from './components/layout/Layout';
 import Login from './pages/Login';
-import Comprobantes from './pages/Comprobantes';
 import Cuentas from './pages/Cuentas';
 import Movimientos from './pages/Movimientos';
 import Dashboard from './pages/Dashboard';
-import ProtectedRoute from './components/ProtectedRoute';
+import Componentes from './pages/usosCompontes'
+import ProtectedRoute from './components/layout/ProtectedRoute';
 
 const App = () => {
     return (
@@ -17,7 +17,7 @@ const App = () => {
                 <Route path="/dashboard" element={<ProtectedRoute><LayoutSidebar><Dashboard /></LayoutSidebar></ProtectedRoute>} />
                 <Route path="/cuentas" element={<ProtectedRoute><LayoutSidebar><Cuentas /></LayoutSidebar></ProtectedRoute>} />
                 <Route path="/movimientos" element={<ProtectedRoute><LayoutSidebar><Movimientos /></LayoutSidebar></ProtectedRoute>} />
-                <Route path="/comprobantes" element={<ProtectedRoute><LayoutSidebar><Comprobantes /></LayoutSidebar></ProtectedRoute>} />
+                <Route path="/usocomponents" element={<ProtectedRoute><LayoutSidebar><Componentes /></LayoutSidebar></ProtectedRoute>} />
             </Routes>
         </Router>
     );
