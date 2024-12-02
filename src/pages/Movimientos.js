@@ -63,6 +63,7 @@ function Movimientos() {
     }
     try {
       const response = await crearMovimiento({ importe, medioPago, comentario, cuentaId });
+      console.log(response)
       if (response) {
         const data = await obtenerTodosMovimientos();
         setMovimientos(data.filter((mov) => mov.isValid));
@@ -126,12 +127,16 @@ function Movimientos() {
       <td className="px-4 py-3 text-center">{movimiento.medioPago}</td>
       <td className="px-4 py-3 flex space-x-2 justify-end">
         <Button label="Ver" onClick={() => handleVerMovimiento(movimiento.id)} color="neutral" />
+       
         {tipo === 'activo' ? (
-          <Button label="Baja" onClick={() => handleCambiarEstado(movimiento.id, 'baja')} color="red" />
+          //aca metele el onclick pa abrir el modal
+           <><Button label="Añadir Comprobante" color="blue" /><Button label="Baja" onClick={() => handleCambiarEstado(movimiento.id, 'baja')} color="red" /></>
         ) : (
           <Button label="Alta" onClick={() => handleCambiarEstado(movimiento.id, 'alta')} color="green" />
         )}
       </td>
+     
+
     </>
   );
 
@@ -177,7 +182,6 @@ function Movimientos() {
             value={cuentaId}
             onChange={(e) => setCuentaId(e.target.value)}
           />
-
 
           <Button className="mt-3" label="Guardar" type="submit" color="green" />
         </form>
