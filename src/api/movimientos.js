@@ -22,17 +22,6 @@ export const cambiarEstadoMovimiento = async (id) => {
   }
 };
 
-// Obtener todos los movimientos
-export const obtenerMovimientos = async () => {
-  try {
-    const response = await api.get('/movimientos/ver');
-    return response.data;
-  } catch (error) {
-    console.error('Error al obtener movimientos:', error);
-    throw error;
-  }
-};
-
 // Obtener un movimiento por ID
 export const obtenerMovimientoPorId = async (id) => {
   try {
@@ -48,9 +37,11 @@ export const obtenerMovimientoPorId = async (id) => {
 export const obtenerTodosMovimientos = async () => {
   try {
     const response = await api.get('/movimientos/ver-todos');
+    console.log(response)
     return response.data;
   } catch (error) {
     console.error('Error al obtener todos los movimientos:', error);
     throw error;
   }
 };
+   
