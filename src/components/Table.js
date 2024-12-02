@@ -4,7 +4,7 @@ import Card from "./Card";
 const Table = ({ columns, data, renderRow, className }) => {
     return (
         <Card className={`border-none min-h-full ${className}`}>
-            <div className="relative overflow-x-auto shadow-md sm:rounded-md">
+            <div className="relative overflow-x-auto sm:rounded-md">
                 <table className="w-full text-sm text-left rtl:text-right text-zinc-500 dark:text-gray-400">
                     <thead className="text-zinc-700 uppercase bg-zinc-300">
                         <tr>

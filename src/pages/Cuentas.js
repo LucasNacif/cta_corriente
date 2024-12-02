@@ -5,7 +5,9 @@ import Button from '../components/Button';
 import Badge from '../components/Badge';
 import Table from '../components/Table';
 import Input from '../components/Input';
-import { Plus, Search, ArrowBigRight, ArrowBigLeft } from 'lucide-react';
+import Card from '../components/Card';
+import { X, Search, Plus, ArrowBigLeft, ArrowBigRight } from 'lucide-react';
+
 
 function Cuentas() {
   const [cuentas, setCuentas] = useState([]);
@@ -132,12 +134,27 @@ function Cuentas() {
 
   return (
     <div className="p-4">
-      <h1 className="text-3xl font-bold text-center mb-6">Cuentas</h1>
+      <div className='flex justify-between'>
+        <h1 className="text-3xl font-bold text-center mb-2">Cuentas</h1>
+        <div>
+          <Button icon={Plus} label="Crear Cuenta" onClick={() => setIsFormModalOpen(true)} color="green" />
+        </div>
+      </div>
 
-      {error && <p className="text-red-500 text-center">{error}</p>}
-
-      <Button icon={Plus} label="Crear Cuenta" onClick={() => setIsFormModalOpen(true)} color="green" />
-
+      {error &&
+        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-monza-700/80 text-monza-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
+            <span className="font-semibold">Error:</span>
+            <p className="text-sm">{error}</p>
+            <button
+              className="ml-auto flex items-center justify-center Ztext-white hover:bg-red-800 rounded-full px-1"
+              onClick={() => setError(null)}
+            >
+              <X className='w-4' />
+            </button>
+          </div>
+        </div>
+      }
       <Table className="mt-4" columns={columnas} data={currentItems} renderRow={renderRow} />
 
       {/* Paginación */}
@@ -160,42 +177,62 @@ function Cuentas() {
       {/* Modal Detalle Cuenta */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Cuenta" label="Resumen de la cuenta">
         {cuentaSeleccionada && (
-          <div>
-            <p><strong>Nombre:</strong> {cuentaSeleccionada.name}</p>
-            <p><strong>Proveedor:</strong> {cuentaSeleccionada.nombreProveedor}</p>
-            <p><strong>Celular:</strong> {cuentaSeleccionada.numeroCelular}</p>
-            <p><strong>Email:</strong> {cuentaSeleccionada.emailProveedor}</p>
-            <p><strong>Dirección:</strong> {cuentaSeleccionada.direccionProveedor}</p>
-            <p><strong>Saldo:</strong> ${cuentaSeleccionada.saldo}</p>
-            <p><strong>Estado Cuenta:</strong> {cuentaSeleccionada.estadoCuenta}</p>
-            <p><strong>Fecha Baja Lógica:</strong> {new Date(cuentaSeleccionada.fechaBajaLogicaCuenta).toLocaleString()}</p>
-            <h3 className="mt-4 text-xl font-semibold">Movimientos:</h3>
-            {cuentaSeleccionada.movimiento.length > 0 ? (
-              cuentaSeleccionada.movimiento.map((movimiento) => (
-                <div key={movimiento.id} className="mt-3">
-                  <p><strong>Importe Movimiento:</strong> ${movimiento.importeMovimiento}</p>
-                  <p><strong>Medio de Pago:</strong> {movimiento.medioPago}</p>
-                  <p><strong>Comentario:</strong> {movimiento.comentarioMovimiento}</p>
-                  <p><strong>Fecha Alta Movimiento:</strong> {new Date(movimiento.fechaAltaMovimiento).toLocaleString()}</p>
-                  <p><strong>Fecha Baja Movimiento:</strong> {new Date(movimiento.fechaBajaMovimiento).toLocaleString()}</p>
-                  <h4 className="mt-2 text-lg font-semibold">Comprobantes:</h4>
-                  {movimiento.comprobantes.length > 0 ? (
-                    movimiento.comprobantes.map((comprobante) => (
-                      <div key={comprobante.id}>
-                        <p><strong>Tipo Comprobante:</strong> {comprobante.tipoComprobante}</p>
-                        <p><strong>Descripción:</strong> {comprobante.descripcion}</p>
-                        <p><strong>Monto:</strong> ${comprobante.montoComprobante}</p>
-                        <p><strong>Número Comprobante:</strong> {comprobante.nroComprobante}</p>
-                        <p><strong>Fecha Comprobante:</strong> {new Date(comprobante.fechaComprobante).toLocaleString()}</p>
-                        <p><strong>Fecha Alta Comprobante:</strong> {new Date(comprobante.fechaAltaComprobante).toLocaleString()}</p>
-                        <p><strong>Fecha Baja Comprobante:</strong> {new Date(comprobante.fechaBajaComprobante).toLocaleString()}</p>
-                        <p><strong>Válido:</strong> {comprobante.valid ? 'Sí' : 'No'}</p>
+          <div className="p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-md font-semibold text-gray-800">Nombre:</p>
+                <p className="text-sm text-gray-600">{cuentaSeleccionada.name}</p>
+              </div>
+              <div>
+                <p className="text-md font-semibold text-gray-800">Proveedor:</p>
+                <p className="text-sm text-gray-600">{cuentaSeleccionada.nombreProveedor}</p>
+              </div>
+              <div>
+                <p className="text-md font-semibold text-gray-800">Celular:</p>
+                <p className="text-sm text-gray-600">{cuentaSeleccionada.numeroCelular}</p>
+              </div>
+              <div>
+                <p className="text-md font-semibold text-gray-800">Email:</p>
+                <p className="text-sm text-gray-600">{cuentaSeleccionada.emailProveedor}</p>
+              </div>
+              <div>
+                <p className="text-md font-semibold text-gray-800">Dirección:</p>
+                <p className="text-sm text-gray-600">{cuentaSeleccionada.direccionProveedor}</p>
+              </div>
+              <div>
+                <p className="text-md font-semibold text-gray-800">Saldo:</p>
+                <p className="text-sm text-gray-600">${cuentaSeleccionada.saldo}</p>
+              </div>
+              <div>
+                <p className="text-md font-semibold text-gray-800">Estado Cuenta:</p>
+                <p className="text-sm text-gray-600">{cuentaSeleccionada.estadoCuenta}</p>
+              </div>
+              <div>
+                <p className="text-md font-semibold text-gray-800">Fecha Baja Lógica:</p>
+                <p className="text-sm text-gray-600">{new Date(cuentaSeleccionada.fechaBajaLogicaCuenta).toLocaleString()}</p>
+              </div>
+            </div>
+
+            <h3 className="mt-6 text-lg font-medium text-gray-900">Movimientos:</h3>
+            <Card className="max-h-60 overflow-y-auto border-zinc-400 p-4">
+              {cuentaSeleccionada.movimiento.length > 0 ? (
+                cuentaSeleccionada.movimiento.map((movimiento) => (
+                  <div key={movimiento.id} className="mt-3 border-b pb-2">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className='space-y-2'>
+                        <p className="text-sm font-medium text-gray-700 ">Importe Movimiento: ${movimiento.importeMovimiento}</p>
+                        <p className="text-sm font-medium text-gray-700 ">Estado: {movimiento.estado}</p>
+                        <p className="text-sm font-medium text-gray-700">Medio de Pago: {movimiento.medioPago}</p>
                       </div>
-                    ))
-                  ) : <p>No hay comprobantes registrados.</p>}
-                </div>
-              ))
-            ) : <p>No hay movimientos registrados.</p>}
+                      <div className='space-y-1'>
+                        <p className="text-sm font-medium text-gray-700">Fecha Alta Movimiento: {new Date(movimiento.fechaAltaMovimiento).toLocaleString()}</p>
+                        <p className="text-sm font-medium text-gray-700">Fecha Baja Movimiento: {new Date(movimiento.fechaBajaMovimiento).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : <p>No hay movimientos registrados.</p>}
+            </Card>
           </div>
         )}
       </Modal>
