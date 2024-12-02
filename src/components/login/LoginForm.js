@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { LoginApi } from '../../api/auth';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import { X } from 'lucide-react';
 
 export default function LoginForm() {
     const navigate = useNavigate();
@@ -37,7 +38,7 @@ export default function LoginForm() {
                 cuit: formData.cuit,
                 password: formData.password,
             });
-            console.log('Respuesta de inicio de sesión:', response); 
+            console.log('Respuesta de inicio de sesión:', response);
             setToken(response);
             setSuccess('Inicio de sesión exitoso!');
             navigate('/dashboard');
@@ -56,8 +57,35 @@ export default function LoginForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            {error && <p className="text-red-500 text-center">{error}</p>}
-            {success && <p className="text-green-500 text-center">{success}</p>}
+            {error &&
+                <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
+                    <div className="bg-monza-700 text-monza-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
+
+                        <p className="text-sm">{error}</p>
+                        <button
+                            className="ml-auto flex items-center justify-center text-white hover:bg-red-800 rounded-full px-1"
+                            onClick={() => setError(null)}
+                        >
+                            <X className='w-4' />
+                        </button>
+                    </div>
+                </div>
+            }
+
+            {success &&
+                <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
+                    <div className="bg-emerald-700 text-emerald-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
+
+                        <p className="text-sm">{success}</p>
+                        <button
+                            className="ml-auto flex items-center justify-center text-white hover:bg-emerald-800 rounded-full px-1"
+                            onClick={() => setError(null)}
+                        >
+                            <X className='w-4' />
+                        </button>
+                    </div>
+                </div>
+            }
 
             <div>
                 <label className="block text-black">Email</label>
@@ -98,6 +126,6 @@ export default function LoginForm() {
             <button type="submit" className="bg-red-600 text-white rounded w-full py-2">
                 Iniciar Sesión
             </button>
-        </form>
+        </form >
     );
 }
