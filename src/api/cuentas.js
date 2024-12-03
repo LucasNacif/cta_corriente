@@ -18,21 +18,20 @@ export const cambiarEstadoCuenta = async (idCuenta) => {
     try {
         const response = await api.post(`/cuentas/cambiar-estado/${idCuenta}`);
         console.log('Estado de la cuenta actualizado:', response.data);
-        return response.data; // Retorna la respuesta al llamador
+        return response.data; 
     } catch (error) {
         console.error('Error al cambiar el estado de la cuenta:', error.response?.data || error.message);
-        throw error; // Lanza el error para manejarlo en el lugar donde se llame la función
+        throw error;
     }
 };
 
 export const verCuentas = async () => {
     try {
         const response = await api.get('/cuentas/ver-cuentas');
-        console.log('Cuentas:', response.data);
-        return response.data; // Aquí se retorna la data obtenida
+        return response.data; 
     } catch (error) {
         console.error('Error al obtener las cuentas:', error.response?.data || error.message);
-        throw error; // Puedes volver a lanzar el error para manejarlo donde se llame la función
+        throw error; 
     }
 };
 

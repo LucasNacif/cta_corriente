@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { crearMovimiento, cambiarEstadoMovimiento, obtenerTodosMovimientos, obtenerMovimientoPorId } from '../api/movimientos.js';
 import { verCuentas } from '../api/cuentas.js';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
@@ -7,15 +6,20 @@ import Table from '../components/Table';
 import Input from '../components/Input';
 import Select from '../components/Select';
 import { Plus, Users } from 'lucide-react';
+import { crearMovimiento, cambiarEstadoMovimiento, obtenerTodosMovimientos, obtenerMovimientoPorId, actualizarMovimiento } from '../api/movimientos.js';
+import { comprobanteApi } from '../api/comprobantes.js';
 
 function Movimientos() {
   const [movimientos, setMovimientos] = useState([]);
   const [movimientosBaja, setMovimientosBaja] = useState([]);
   const [cuentas, setCuentas] = useState([]);
   const [error, setError] = useState(null);
+  const [errorModal, setErrorModal] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isFormModalComp, setIsFormModalOpenComp] = useState(false);
+
   const [movimientoSeleccionado, setMovimientoSeleccionado] = useState(null);
 
   const [importeMovimiento, setImporte] = useState(0);
@@ -23,8 +27,23 @@ function Movimientos() {
   const [comentarioMovimiento, setComentario] = useState('');
   const [cuentaId, setCuentaId] = useState('');
 
-  const [page, setPage] = useState(1); 
-  const [itemsPerPage] = useState(3); 
+  const [page, setPage] = useState(1);
+  const [itemsPerPage] = useState(3);
+
+  const [montoComprobante, setMontoComprobante] = useState(0);
+  const [descripcionComprobante, setDescripcionComprobante] = useState('');
+  const [fechaComprobante, setFechaComprobante] = useState('');
+  const [tipoComprobante, setTipoComprobante] = useState('FACTURA');
+  const [nroComprobante, setNumeroComprobante] = useState('');
+
+  const tipoComprobanteOptions = [
+    { value: 'FACTURA', label: 'Factura' },
+    { value: 'NOTA_DEBITO', label: 'Nota de Débito' },
+    { value: 'NOTA_CREDITO', label: 'Nota de Crédito' },
+    { value: 'RECIBO', label: 'Recibo' },
+    { value: 'REMITO', label: 'Remito' },
+    { value: 'TICKET', label: 'Ticket' },
+  ];
 
   const mediosPagoOptions = [
     { value: 'EFECTIVO', label: 'Efectivo' },
@@ -116,14 +135,15 @@ function Movimientos() {
     }
   };
 
-   // Paginación para movimientos activos
-   const movimientosActivosPaginados = movimientos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-   const movimientosBajaPaginados = movimientosBaja.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+  // Paginación para movimientos activos
+  const movimientosActivosPaginados = movimientos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+  const movimientosBajaPaginados = movimientosBaja.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-   
+
   const columnas = [
     { header: 'Comentario', align: 'text-left' },
     { header: 'Importe', align: 'text-center' },
+    { header: 'Entregado', align: 'text-center' },
     { header: 'Medio de Pago', align: 'text-center' },
     { header: 'Acciones', align: 'text-end' },
   ];
@@ -132,65 +152,123 @@ function Movimientos() {
     <>
       <td className="px-4 py-3">{movimiento.comentarioMovimiento}</td>
       <td className="px-4 py-3 text-center">${movimiento.importeMovimiento}</td>
+      <td className="px-4 py-3 text-center">${movimiento.importePagado}</td>
       <td className="px-4 py-3 text-center">{movimiento.medioPago}</td>
       <td className="px-4 py-3 flex space-x-2 justify-end">
         <Button label="Ver" onClick={() => handleVerMovimiento(movimiento.id)} color="neutral" />
-       
+
         {tipo === 'activo' ? (
-          //aca metele el onclick pa abrir el modal
-           <><Button label="Añadir Comprobante" color="blue" /><Button label="Baja" onClick={() => handleCambiarEstado(movimiento.id, 'baja')} color="red" /></>
+          <>
+            <Button label="Añadir Comprobante" color="blue" onClick={() => {
+              setMovimientoSeleccionado(movimiento);
+              setIsFormModalOpenComp(true);
+            }} />
+            <Button label="Baja" onClick={() => handleCambiarEstado(movimiento.id, 'baja')} color="red" />
+          </>
         ) : (
           <Button label="Alta" onClick={() => handleCambiarEstado(movimiento.id, 'alta')} color="green" />
         )}
       </td>
     </>
   );
-    // Funciones para navegación de páginas
-    const handleNextPage = () => {
-      setPage(page + 1);
-    };
-  
-    const handlePreviousPage = () => {
-      if(page > 1){
-        setPage(page - 1);
+  // Funciones para navegación de páginas
+  const handleNextPage = () => {
+    setPage(page + 1);
+  };
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
+
+  const handleAñadirComprobante = async () => {
+
+    if (!montoComprobante || montoComprobante === 0 || !descripcionComprobante || !fechaComprobante) {
+      setErrorModal('Debe completar todos los campos del comprobante.');
+      return;
+    }
+    try {
+
+      // Verificar que el importe del comprobante no supere el del movimiento
+      const nuevoimportePagado = parseFloat(movimientoSeleccionado.importePagado) + parseFloat(montoComprobante);
+      if (nuevoimportePagado > movimientoSeleccionado.importeMovimiento) {
+        setErrorModal('El importe total de los comprobantes no puede superar el importe del movimiento.');
+        return;
       }
-    };
+      console.log("Importe total:", movimientoSeleccionado.importeMovimiento);
+      console.log("Importe entregado:", movimientoSeleccionado.importePagado);
+      console.log("Importe del comprobante a ingresar: ", montoComprobante);
+      console.log("Suma del importe nuevo y el viejo: ", parseInt(nuevoimportePagado));
+      console.log("Es mayor? ", nuevoimportePagado > movimientoSeleccionado.importeMovimiento);
 
 
-    return (
-      <div className="p-4">
-        <h1 className="text-3xl font-bold text-center mb-6">Movimientos</h1>
-  
-        {error && <p className="text-red-500 text-center">{error}</p>}
-  
-        <Button label="Crear Movimiento" icon={Plus} onClick={() => setIsFormModalOpen(true)} color="green" />
-  
-        <p className="font-normal text-sm mt-4 pb-2">Movimientos Activos</p>
-        <Table columns={columnas} data={movimientosActivosPaginados} renderRow={(mov) => renderRow(mov, 'activo')} />
-  
-        <p className="font-normal text-sm pb-2 mt-6">Movimientos de Baja</p>
-        <Table columns={columnas} data={movimientosBajaPaginados} renderRow={(mov) => renderRow(mov, 'baja')} />
-  
-        {/* Paginación */}
-        <div className="flex justify-between mt-4">
-          <Button label="Anterior" onClick={handlePreviousPage} disabled={page === 1} color="neutral" />
-          <span className="px-4 text-sm text-gray-600">Página {page}</span>
-          <Button label="Siguiente" onClick={handleNextPage} disabled={movimientos.length <= page * itemsPerPage} color="neutral" />
-        </div>
-  
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Movimiento" icon={Users}>
-          {movimientoSeleccionado ? (
-            <div>
-              <p><strong>Comentario:</strong> {movimientoSeleccionado.comentarioMovimiento}</p>
-              <p><strong>Importe:</strong> ${movimientoSeleccionado.importeMovimiento}</p>
-              <p><strong>Medio de Pago:</strong> {movimientoSeleccionado.medioPago}</p>
-            </div>
-          ) : (
-            <p>No hay información disponible para este movimiento.</p>
-          )}
-        </Modal>
-  
-        <Modal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title="Nuevo Movimiento" icon={Users}>
+      // Actualizar el movimiento en el backend
+      const movimientoResponse = await actualizarMovimiento(movimientoSeleccionado.id, parseFloat(montoComprobante));
+
+      console.log(movimientoResponse);
+
+      if (movimientoResponse) {
+        const nuevoComprobante = {
+          tipoComprobante,
+          descripcion: descripcionComprobante,
+          nroComprobante,
+          fechaComprobante,
+          montoComprobante: parseFloat(montoComprobante),
+          movimientoId: movimientoSeleccionado.id,
+        };
+
+        // Enviar el comprobante al backend
+        const response = await comprobanteApi.save(nuevoComprobante);
+
+        if (response) {
+          setIsFormModalOpenComp(false);
+          setMontoComprobante(0);
+          setDescripcionComprobante('');
+          setFechaComprobante('');
+        }
+      }
+    } catch (error) {
+      setErrorModal('Error al añadir el comprobante.');
+      console.error(error);
+    }
+  };
+
+  return (
+    <div className="p-4">
+      <h1 className="text-3xl font-bold text-center mb-6">Movimientos</h1>
+
+      {error && <p className="text-red-500 text-center">{error}</p>}
+
+      <Button label="Crear Movimiento" icon={Plus} onClick={() => setIsFormModalOpen(true)} color="green" />
+
+      <p className="font-normal text-sm mt-4 pb-2">Movimientos Activos</p>
+      <Table columns={columnas} data={movimientosActivosPaginados} renderRow={(mov) => renderRow(mov, 'activo')} />
+
+      <p className="font-normal text-sm pb-2 mt-6">Movimientos de Baja</p>
+      <Table columns={columnas} data={movimientosBajaPaginados} renderRow={(mov) => renderRow(mov, 'baja')} />
+
+      {/* Paginación */}
+      <div className="flex justify-between mt-4">
+        <Button label="Anterior" onClick={handlePreviousPage} disabled={page === 1} color="neutral" />
+        <span className="px-4 text-sm text-gray-600">Página {page}</span>
+        <Button label="Siguiente" onClick={handleNextPage} disabled={movimientos.length <= page * itemsPerPage} color="neutral" />
+      </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Movimiento" icon={Users}>
+        {movimientoSeleccionado ? (
+          <div>
+            <p><strong>Comentario:</strong> {movimientoSeleccionado.comentarioMovimiento}</p>
+            <p><strong>Importe:</strong> ${movimientoSeleccionado.importeMovimiento}</p>
+            <p><strong>Medio de Pago:</strong> {movimientoSeleccionado.medioPago}</p>
+          </div>
+        ) : (
+          <p>No hay información disponible para este movimiento.</p>
+        )}
+      </Modal>
+
+      <Modal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title="Nuevo Movimiento" icon={Users}>
         <form onSubmit={handleCrearMovimiento}>
           <Input label="Importe" type="number" value={importeMovimiento} onChange={(e) => setImporte(e.target.value)} />
           <Select label="Medio de Pago" options={mediosPagoOptions} value={medioPago} onChange={(e) => setMedioPago(e.target.value)} />
@@ -207,7 +285,20 @@ function Movimientos() {
           <Button className="mt-3" label="Guardar" type="submit" color="green" />
         </form>
       </Modal>
-      </div>
-    );
-  }
+
+      <Modal isOpen={isFormModalComp} onClose={() => setIsFormModalOpenComp(false)} title="Nuevo Comprobante" icon={Plus}>
+      {errorModal && <p className="text-red-500 text-center">{errorModal}</p>}
+        <form onSubmit={handleAñadirComprobante}>
+          <Select label="Tipo de Comprobante" options={tipoComprobanteOptions} value={tipoComprobante} onChange={(e) => setTipoComprobante(e.target.value)} />
+          <Input label="Monto" type="number" value={montoComprobante} onChange={(e) => setMontoComprobante(e.target.value)} />
+          <Input label="Descripción" type="text" value={descripcionComprobante} onChange={(e) => setDescripcionComprobante(e.target.value)} />
+          <Input label="Fecha" type="date" value={fechaComprobante} onChange={(e) => setFechaComprobante(e.target.value)} />
+          <Input label="Número de Comprobante" type="text" value={nroComprobante} onChange={(e) => setNumeroComprobante(e.target.value)} />
+          <Button label="Añadir Comprobante" type="submit" color="green" />
+        </form>
+      </Modal>
+
+    </div>
+  );
+}
 export default Movimientos;

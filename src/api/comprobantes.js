@@ -20,8 +20,9 @@ export const comprobanteApi = {
     },
 
     // Crear un comprobante
-    save: async (id, userData) => {
-        const response = await api.post('/comprobantes/guardar', userData);
+    save: async (comp) => {
+        console.log(comp);
+        const response = await api.post('/comprobantes/guardar', comp);
         return response.data;
     },
 

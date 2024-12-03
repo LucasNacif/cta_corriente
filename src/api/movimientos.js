@@ -3,9 +3,7 @@ import api from './axiosConfig';
 // Crear un movimiento
 export const crearMovimiento = async (movimientoData) => {
   try {
-    console.log(movimientoData)
     const response = await api.post('/movimientos/crear-movimiento', movimientoData);
-    console.log(response)
     return response.data;
   } catch (error) {
     console.error('Error al crear movimiento:', error);
@@ -39,11 +37,20 @@ export const obtenerMovimientoPorId = async (id) => {
 export const obtenerTodosMovimientos = async () => {
   try {
     const response = await api.get('/movimientos/ver-todos');
-    console.log(response)
     return response.data;
   } catch (error) {
     console.error('Error al obtener todos los movimientos:', error);
     throw error;
   }
 };
-   
+
+export const actualizarMovimiento = async (id, importePagado) => {
+  try {
+    const response = await api.post('/movimientos/importe-sumar', { id, importePagado });
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar el movimiento:', error);
+    throw error;
+  }
+};
+
