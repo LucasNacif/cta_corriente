@@ -217,17 +217,10 @@ function Movimientos() {
   const handleAñadirComprobante = async (e) => {
 
     e.preventDefault();
-
-    // Function to show and automatically hide error
-    const showErrorWithTimeout = (message) => {
-      setErrorModal(message);
-      setTimeout(() => {
-        setErrorModal(null);
-      }, 2000);
-    };
+    setErrorModal(null);
 
     if (!montoComprobante || montoComprobante === 0 || !descripcionComprobante || !fechaComprobante) {
-      showErrorWithTimeout('Debe completar todos los campos del comprobante.');
+      setErrorModal('Debe completar todos los campos del comprobante.');
       return;
     }
     try {
@@ -382,6 +375,12 @@ function Movimientos() {
           <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
             <div className="bg-monza-700/80 text-monza-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
               <p className="text-sm">{errorModal}</p>
+              <button
+                className="ml-auto flex items-center justify-center Ztext-white hover:bg-red-800 rounded-full px-1"
+                onClick={() => setErrorModal(null)}
+              >
+                <X className='w-4' />
+              </button>
             </div>
           </div>
         }
