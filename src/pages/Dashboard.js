@@ -184,7 +184,7 @@ export default function Dashboard() {
                                         return (
                                             <div key={mov.id} className="flex items-center justify-between">
                                                 <p className="text-sm">
-                                                    {mov.cuentaNombre} - Movimiento: {mov.comentarioMovimiento}
+                                                    {mov.cuentaNombre} - Movimiento N°: {mov.numeroMovimiento}
                                                 </p>
                                                 <AlertBadge value={estado} color={color} />
                                             </div>

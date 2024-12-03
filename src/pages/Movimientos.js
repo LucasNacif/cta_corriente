@@ -5,6 +5,7 @@ import Button from '../components/Button';
 import Table from '../components/Table';
 import Input from '../components/Input';
 import Select from '../components/Select';
+import Card from '../components/Card';
 import { Plus, Users, X, Eye, EyeClosed, Search, ArrowBigRight, ArrowBigLeft } from 'lucide-react';
 import { crearMovimiento, cambiarEstadoMovimiento, obtenerTodosMovimientos, obtenerMovimientoPorId, actualizarMovimiento } from '../api/movimientos.js';
 import { comprobanteApi } from '../api/comprobantes.js';
@@ -24,6 +25,7 @@ function Movimientos() {
 
   const [movimientoSeleccionado, setMovimientoSeleccionado] = useState(null);
 
+  const [numeroMovimiento, setnumeroMovimiento] = useState(0);
   const [importeMovimiento, setImporte] = useState(0);
   const [medioPago, setMedioPago] = useState('EFECTIVO');
   const [comentarioMovimiento, setComentario] = useState('');
@@ -63,6 +65,7 @@ function Movimientos() {
         const cuentasData = await verCuentas();
         if (Array.isArray(cuentasData) && cuentasData.length > 0) {
           setCuentas(cuentasData);
+          setCuentaId(cuentasData[0].id);
         } else {
           setCuentas([]);
           setError('No se encontraron cuentas disponibles.');
@@ -177,7 +180,8 @@ function Movimientos() {
 
 
   const columnas = [
-    { header: 'Comentario', align: 'text-left' },
+    { header: 'N°', align: 'text-left' },
+    { header: 'Comentario', align: 'text-center' },
     { header: 'Importe', align: 'text-center' },
     { header: 'Entregado', align: 'text-center' },
     { header: 'Medio de Pago', align: 'text-center' },
@@ -186,6 +190,7 @@ function Movimientos() {
 
   const renderRow = (movimiento, tipo) => (
     <>
+      <td className="px-4 py-3">{movimiento.numeroMovimiento}</td>
       <td className="px-4 py-3">{movimiento.comentarioMovimiento}</td>
       <td className="px-4 py-3 text-center">${movimiento.importeMovimiento}</td>
       <td className="px-4 py-3 text-center">${movimiento.importePagado}</td>
@@ -339,7 +344,7 @@ function Movimientos() {
         />
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Movimiento" icon={Users}>
+      {/* <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Movimiento" icon={Users}>
         {movimientoSeleccionado ? (
           <div>
             <p><strong>Comentario:</strong> {movimientoSeleccionado.comentarioMovimiento}</p>
@@ -350,26 +355,87 @@ function Movimientos() {
               .split(" ")
               .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
               .join(" ")}</p>
+            <p><strong>Comprobante:</strong>{movimientoSeleccionado.comprobantes}</p>
           </div>
         ) : (
           <p>No hay información disponible para este movimiento.</p>
         )}
+      </Modal> */}
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Movimiento" label="Resumen del Movimiento" className="md:w-1/2">
+        {movimientoSeleccionado && (
+          <div className="p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-md font-semibold text-gray-800">Número de Movimiento:</p>
+                <p className="text-sm text-gray-600">{movimientoSeleccionado.numeroMovimiento}</p>
+              </div>
+              <div>
+                <p className="text-md font-semibold text-gray-800">Importe Movimiento:</p>
+                <p className="text-sm text-gray-600">${movimientoSeleccionado.importeMovimiento}</p>
+              </div>
+              <div>
+                <p className="text-md font-semibold text-gray-800">Importe Pagado:</p>
+                <p className="text-sm text-gray-600">${movimientoSeleccionado.importePagado}</p>
+              </div>
+              <div>
+                <p className="text-md font-semibold text-gray-800">Medio de Pago:</p>
+                <p className="text-sm text-gray-600">{movimientoSeleccionado.medioPago}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-md font-semibold text-gray-800">Comentario:</p>
+                <p className="text-sm text-gray-600">{movimientoSeleccionado.comentarioMovimiento}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-md font-semibold text-gray-800">Fecha de Alta:</p>
+                <p className="text-sm text-gray-600">{new Date(movimientoSeleccionado.fechaAltaMovimiento).toLocaleString()}</p>
+              </div>
+            </div>
+
+            <h3 className="mt-6 text-lg font-medium text-gray-900">Comprobantes:</h3>
+            <Card className="max-h-60 overflow-y-auto border-zinc-400 p-4">
+              {movimientoSeleccionado.comprobantes.length > 0 ? (
+                movimientoSeleccionado.comprobantes.map((comprobante) => (
+                  <div key={comprobante.id} className="pb-2 border-b border-zinc-400">
+                    <p className="text-sm font-medium text-gray-700">
+                      <span className="font-semibold">Tipo:</span> {comprobante.tipoComprobante}
+                    </p>
+                    <p className="text-sm font-medium text-gray-700">
+                      <span className="font-semibold">Descripción:</span> {comprobante.descripcion}
+                    </p>
+                    <p className="text-sm font-medium text-gray-700">
+                      <span className="font-semibold">Monto:</span> ${comprobante.montoComprobante}
+                    </p>
+                    <p className="text-sm font-medium text-gray-700">
+                      <span className="font-semibold">Número:</span> {comprobante.nroComprobante}
+                    </p>
+                    <p className="text-sm font-medium text-gray-700">
+                      <span className="font-semibold">Fecha del Comprobante:</span> {new Date(comprobante.fechaComprobante).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm font-medium text-zinc-700">No hay comprobantes registrados.</p>
+              )}
+            </Card>
+          </div>
+        )}
       </Modal>
+
+
 
       <Modal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title="Nuevo Movimiento" icon={Users}>
         <form onSubmit={handleCrearMovimiento} className='space-y-3'>
-          <Input label="Importe" type="number" value={importeMovimiento} onChange={(e) => setImporte(e.target.value)} />
-          <Select label="Medio de Pago" options={mediosPagoOptions} value={medioPago} onChange={(e) => setMedioPago(e.target.value)} />
-          <Input label="Comentario" type="text" value={comentarioMovimiento} onChange={(e) => setComentario(e.target.value)} />
+          <Input label="Importe" type="number" value={importeMovimiento} onChange={(e) => setImporte(e.target.value)} required />
+          <Select label="Medio de Pago" options={mediosPagoOptions} value={medioPago} onChange={(e) => setMedioPago(e.target.value)} required />
+          <Input label="Comentario" type="text" value={comentarioMovimiento} onChange={(e) => setComentario(e.target.value)} required />
 
           <Select
             label="Cuenta"
-            options={cuentas && cuentas.length > 0 ? cuentas.map((cuenta) => ({
-              value: cuenta.id,
-              label: cuenta.nombreProveedor
-            })) : []}
+            options={cuentas && cuentas.length > 0 ? cuentas.map((cuenta) => ({ value: cuenta.id, label: cuenta.nombreProveedor })) : []}
             value={cuentaId}
             onChange={(e) => setCuentaId(e.target.value)}
+            required
           />
           <Button className="mt-3" label="Guardar" type="submit" color="green" />
         </form>

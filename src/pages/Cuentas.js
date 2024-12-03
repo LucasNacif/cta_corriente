@@ -91,7 +91,6 @@ function Cuentas() {
   };
 
   const getEstadoColor = (estado) => {
-    console.log("Estado recibido: ", estado);
     switch (estado) {
       case 'MOROSA':
         return 'red';
