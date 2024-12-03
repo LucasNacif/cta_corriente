@@ -12,6 +12,8 @@ import { comprobanteApi } from '../api/comprobantes.js';
 function Movimientos() {
   const [movimientos, setMovimientos] = useState([]);
   const [movimientosBaja, setMovimientosBaja] = useState([]);
+  const [pageActivos, setPageActivos] = useState(1);
+  const [pageBaja, setPageBaja] = useState(1);
   const [cuentas, setCuentas] = useState([]);
   const [error, setError] = useState(null);
   const [errorModal, setErrorModal] = useState(null);
@@ -61,7 +63,7 @@ function Movimientos() {
 
         //obtengo las cuentas tambien para el select
         const cuentasData = await verCuentas();
-        setCuentas(Array.isArray(cuentasData) ? data : []); 
+        setCuentas(Array.isArray(cuentasData) ? data : []);
 
         if (data.length) {
           setMovimientos(data.filter((mov) => mov.isValid));
@@ -134,10 +136,41 @@ function Movimientos() {
       console.error(error);
     }
   };
+  // Lógica de paginación de movimientos activos
+  const movimientosActivosPaginados = movimientos.slice((pageActivos - 1) * itemsPerPage, pageActivos * itemsPerPage);
+  // Lógica de paginación de movimientos de baja
+  const movimientosBajaPaginados = movimientosBaja.slice((pageBaja - 1) * itemsPerPage, pageBaja * itemsPerPage);
 
-  // Paginación para movimientos activos
-  const movimientosActivosPaginados = movimientos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-  const movimientosBajaPaginados = movimientosBaja.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+  // Total de páginas para movimientos activos
+  const totalPagesActivos = Math.ceil(movimientos.length / itemsPerPage);
+  // Total de páginas para movimientos de baja
+  const totalPagesBaja = Math.ceil(movimientosBaja.length / itemsPerPage);
+
+  // Funciones de navegación de páginas para movimientos activos
+  const handleNextPageActivos = () => {
+    if (pageActivos < totalPagesActivos) {
+      setPageActivos(pageActivos + 1);
+    }
+  };
+
+  const handlePreviousPageActivos = () => {
+    if (pageActivos > 1) {
+      setPageActivos(pageActivos - 1);
+    }
+  };
+
+  // Funciones de navegación de páginas para movimientos de baja
+  const handleNextPageBaja = () => {
+    if (pageBaja < totalPagesBaja) {
+      setPageBaja(pageBaja + 1);
+    }
+  };
+
+  const handlePreviousPageBaja = () => {
+    if (pageBaja > 1) {
+      setPageBaja(pageBaja - 1);
+    }
+  };
 
 
   const columnas = [
@@ -176,16 +209,6 @@ function Movimientos() {
       </td>
     </>
   );
-  // Funciones para navegación de páginas
-  const handleNextPage = () => {
-    setPage(page + 1);
-  };
-
-  const handlePreviousPage = () => {
-    if (page > 1) {
-      setPage(page - 1);
-    }
-  };
 
 
   const handleAñadirComprobante = async () => {
@@ -262,25 +285,43 @@ function Movimientos() {
         </div>
       }
 
+      {/* Movimientos Activos */}
       <p className="font-normal text-sm mt-4 pb-2">Movimientos Activos</p>
       <Table columns={columnas} data={movimientosActivosPaginados} renderRow={(mov) => renderRow(mov, 'activo')} />
-
-      <p className="font-normal text-sm pb-2 mt-6">Movimientos de Baja</p>
-      <Table columns={columnas} data={movimientosBajaPaginados} renderRow={(mov) => renderRow(mov, 'baja')} />
-
-      {/* Paginación */}
+      {/* Paginación de movimientos activos */}
       <div className="flex justify-end mt-4">
         <Button
           icon={ArrowBigLeft}
           color="neutral2"
-          onClick={handlePreviousPage}
-          disabled={page === 1}
+          onClick={handlePreviousPageActivos}
+          disabled={pageActivos === 1}
         />
-        <span className="mx-7 flex items-center text-sm font-extralight">Página {page}</span>
+        <span className="mx-7 flex items-center text-sm font-extralight">Página {pageActivos} de {totalPagesActivos}</span>
         <Button
           icon={ArrowBigRight}
           color="neutral2"
-          onClick={handleNextPage} disabled={movimientos.length <= page * itemsPerPage}
+          onClick={handleNextPageActivos}
+          disabled={pageActivos === totalPagesActivos}
+        />
+      </div>
+
+      {/* Movimientos de Baja */}
+      <p className="font-normal text-sm pb-2 mt-6">Movimientos de Baja</p>
+      <Table columns={columnas} data={movimientosBajaPaginados} renderRow={(mov) => renderRow(mov, 'baja')} />
+      {/* Paginación de movimientos de baja */}
+      <div className="flex justify-end mt-4">
+        <Button
+          icon={ArrowBigLeft}
+          color="neutral2"
+          onClick={handlePreviousPageBaja}
+          disabled={pageBaja === 1}
+        />
+        <span className="mx-7 flex items-center text-sm font-extralight">Página {pageBaja} de {totalPagesBaja}</span>
+        <Button
+          icon={ArrowBigRight}
+          color="neutral2"
+          onClick={handleNextPageBaja}
+          disabled={pageBaja === totalPagesBaja}
         />
       </div>
 
@@ -327,7 +368,7 @@ function Movimientos() {
           <Input label="Descripción" type="text" value={descripcionComprobante} onChange={(e) => setDescripcionComprobante(e.target.value)} />
           <Input label="Fecha" type="date" value={fechaComprobante} onChange={(e) => setFechaComprobante(e.target.value)} />
           <Input label="Número de Comprobante" type="text" value={nroComprobante} onChange={(e) => setNumeroComprobante(e.target.value)} />
-          <Button label="Añadir Comprobante" type="submit" color="green" />
+          <Button className="mt-3" label="Añadir Comprobante" type="submit" color="green" />
         </form>
       </Modal>
 

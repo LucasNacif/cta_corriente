@@ -6,6 +6,7 @@ import Badge from '../components/Badge';
 import Table from '../components/Table';
 import Input from '../components/Input';
 import Card from '../components/Card';
+import AlertBadge from '../components/AlertBadge';
 import { X, Search, Plus, ArrowBigLeft, ArrowBigRight } from 'lucide-react';
 
 
@@ -31,7 +32,7 @@ function Cuentas() {
     const fetchCuentas = async () => {
       try {
         const data = await verCuentas();
-        setCuentas(Array.isArray(data) ? data : []); 
+        setCuentas(Array.isArray(data) ? data : []);
       } catch (error) {
         setError('Error al obtener las cuentas');
       }
@@ -164,7 +165,7 @@ function Cuentas() {
           onClick={() => paginate(currentPage - 1)}
           disabled={currentPage === 1}
         />
-        <span className="mx-7 flex items-center text-sm font-extralight">Página {currentPage}</span>
+        <span className="mx-7 flex items-center text-sm font-extralight">Página {currentPage} de {totalPages}</span>
         <Button
           icon={ArrowBigRight}
           color="neutral2"
@@ -203,38 +204,56 @@ function Cuentas() {
             <h3 className="mt-6 text-lg font-medium text-gray-900">Movimientos:</h3>
             <Card className="max-h-60 overflow-y-auto border-zinc-400 p-4">
               {cuentaSeleccionada.movimiento.length > 0 ? (
-                cuentaSeleccionada.movimiento.map((movimiento, index) => (
-                  <div
-                    key={movimiento.id}
-                    className={`mt-3 pb-2 ${index !== cuentaSeleccionada.movimiento.length - 1 ? "border-b border-zinc-400" : ""}`}
-                  >
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-gray-700">
-                          <span className="font-semibold ">Importe Movimiento:</span> ${movimiento.importeMovimiento}
-                        </p>
-                        <p className="text-sm font-medium text-gray-700">
-                          <span className="font-semibold">Medio de Pago:</span> {movimiento.medioPago
-                            .toLowerCase()
-                            .replace(/_/g, " ")
-                            .split(" ")
-                            .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
-                            .join(" ")}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-gray-700">
-                          <span className="font-semibold">Fecha Alta Movimiento:</span> {new Date(movimiento.fechaAltaMovimiento).toLocaleString()}
-                        </p>
+                cuentaSeleccionada.movimiento.map((movimiento, index) => {
+                  // Definición del estado y color dentro del map
+                  const estado = movimiento.importePagado >= movimiento.importeMovimiento ? 'Al Día' : 'Pendiente';
+                  const color = movimiento.importePagado >= movimiento.importeMovimiento ? 'green' : 'yellow';
+
+                  return (
+                    <div
+                      key={movimiento.id}
+                      className={`mt-3 pb-2 ${index !== cuentaSeleccionada.movimiento.length - 1 ? "border-b border-zinc-400" : ""}`}
+                    >
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-gray-700">
+                            <span className="font-semibold ">Importe Movimiento:</span> ${movimiento.importeMovimiento}
+                          </p>
+                          <p className="text-sm font-medium text-gray-700">
+                            <span className="font-semibold ">Importe Pagado:</span> ${movimiento.importePagado}
+                          </p>
+
+                          <p className="text-sm font-medium text-gray-700">
+                            <span className="font-semibold ">Importe Entregado:</span> ${(
+                              movimiento.importeMovimiento - movimiento.importePagado
+                            ).toFixed(2)}
+                          </p>
+                          <p className="text-sm font-medium text-gray-700">
+                            <span className="font-semibold mr-2">Estado:</span>
+                            <AlertBadge value={estado} color={color} />
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-gray-700">
+                            <span className="font-semibold">Fecha Alta Movimiento:</span> {new Date(movimiento.fechaAltaMovimiento).toLocaleString()}
+                          </p>
+                          <p className="text-sm font-medium text-gray-700">
+                            <span className="font-semibold">Medio de Pago:</span> {movimiento.medioPago
+                              .toLowerCase()
+                              .replace(/_/g, " ")
+                              .split(" ")
+                              .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+                              .join(" ")}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className='text-sm font-medium text-zinc-700'>No hay movimientos registrados.</p>
               )}
             </Card>
-
           </div>
         )}
       </Modal>

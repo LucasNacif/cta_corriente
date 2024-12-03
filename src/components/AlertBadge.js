@@ -8,7 +8,7 @@ const Badge = ({ value, color }) => {
     };
 
     return (
-        <span className={`inline-flex items-center px-2 py-2 rounded-full text-xs font-medium ${colorClasses[color]}`}>
+        <span className={` items-center px-2 py-1 rounded-full text-xs font-medium ${colorClasses[color]}`}>
             {value}
         </span>
     );
