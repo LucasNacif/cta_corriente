@@ -14,7 +14,7 @@ const Modal = ({ isOpen, onClose, title, label, className, children }) => {
                     <X className='w-4 h-auto hover:text-gray-500' />
                 </button>
                 <div className='py-5 px-2'>
-                    <h2 className="text-lg font-medium ml-4 text-zinc-800">{title}</h2>
+                    <h2 className="text-xl font-medium ml-4 text-zinc-800">{title}</h2>
                     <p className='text-sm font-light ml-4 text-zinc-500'>{label}</p>
                 </div>
                 <div className='px-6 pb-4'>

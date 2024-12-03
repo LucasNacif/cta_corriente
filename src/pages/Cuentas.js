@@ -121,7 +121,7 @@ function Cuentas() {
       <td className="px-4 py-3 text-sm">{cuenta.emailProveedor}</td>
       <td className="px-4 py-3 text-sm">{cuenta.direccionProveedor}</td>
       <td className={`px-2 py-1 text-center`}>
-        <Badge label={cuenta.estadoCuenta.toLowerCase()} color={`${getEstadoColor(cuenta.estadoCuenta)}`} />
+        <Badge label={cuenta.estadoCuenta.charAt(0).toUpperCase() + cuenta.estadoCuenta.slice(1).toLowerCase()} color={`${getEstadoColor(cuenta.estadoCuenta)}`} />
       </td>
       <td className="px-4 py-3 ">
         <Button icon={Search} label="Ver" onClick={() => handleVerCuenta(cuenta.id)} color="neutral2" />
@@ -164,7 +164,7 @@ function Cuentas() {
           onClick={() => paginate(currentPage - 1)}
           disabled={currentPage === 1}
         />
-        <span className="mx-7 flex items-center text-sm font-extralight">{currentPage} / {totalPages}</span>
+        <span className="mx-7 flex items-center text-sm font-extralight">Página {currentPage}</span>
         <Button
           icon={ArrowBigRight}
           color="neutral2"
@@ -174,7 +174,7 @@ function Cuentas() {
       </div>
 
       {/* Modal Detalle Cuenta */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Cuenta" label="Resumen de la cuenta">
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Cuenta" label="Resumen de la cuenta" className="md:w-1/2">
         {cuentaSeleccionada && (
           <div className="p-4">
             <div className="grid grid-cols-2 gap-4">
@@ -194,44 +194,47 @@ function Cuentas() {
                 <p className="text-md font-semibold text-gray-800">Email:</p>
                 <p className="text-sm text-gray-600">{cuentaSeleccionada.emailProveedor}</p>
               </div>
-              <div>
+              <div className='col-span-2'>
                 <p className="text-md font-semibold text-gray-800">Dirección:</p>
                 <p className="text-sm text-gray-600">{cuentaSeleccionada.direccionProveedor}</p>
-              </div>
-              <div>
-                <p className="text-md font-semibold text-gray-800">Saldo:</p>
-                <p className="text-sm text-gray-600">${cuentaSeleccionada.saldo}</p>
-              </div>
-              <div>
-                <p className="text-md font-semibold text-gray-800">Estado Cuenta:</p>
-                <p className="text-sm text-gray-600">{cuentaSeleccionada.estadoCuenta}</p>
-              </div>
-              <div>
-                <p className="text-md font-semibold text-gray-800">Fecha Baja Lógica:</p>
-                <p className="text-sm text-gray-600">{new Date(cuentaSeleccionada.fechaBajaLogicaCuenta).toLocaleString()}</p>
               </div>
             </div>
 
             <h3 className="mt-6 text-lg font-medium text-gray-900">Movimientos:</h3>
             <Card className="max-h-60 overflow-y-auto border-zinc-400 p-4">
               {cuentaSeleccionada.movimiento.length > 0 ? (
-                cuentaSeleccionada.movimiento.map((movimiento) => (
-                  <div key={movimiento.id} className="mt-3 border-b pb-2">
+                cuentaSeleccionada.movimiento.map((movimiento, index) => (
+                  <div
+                    key={movimiento.id}
+                    className={`mt-3 pb-2 ${index !== cuentaSeleccionada.movimiento.length - 1 ? "border-b border-zinc-400" : ""}`}
+                  >
                     <div className="grid grid-cols-2 gap-4">
-                      <div className='space-y-2'>
-                        <p className="text-sm font-medium text-gray-700 ">Importe Movimiento: ${movimiento.importeMovimiento}</p>
-                        <p className="text-sm font-medium text-gray-700 ">Estado: {movimiento.estado}</p>
-                        <p className="text-sm font-medium text-gray-700">Medio de Pago: {movimiento.medioPago}</p>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-gray-700">
+                          <span className="font-semibold ">Importe Movimiento:</span> ${movimiento.importeMovimiento}
+                        </p>
+                        <p className="text-sm font-medium text-gray-700">
+                          <span className="font-semibold">Medio de Pago:</span> {movimiento.medioPago
+                            .toLowerCase()
+                            .replace(/_/g, " ")
+                            .split(" ")
+                            .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+                            .join(" ")}
+                        </p>
                       </div>
-                      <div className='space-y-1'>
-                        <p className="text-sm font-medium text-gray-700">Fecha Alta Movimiento: {new Date(movimiento.fechaAltaMovimiento).toLocaleString()}</p>
-                        <p className="text-sm font-medium text-gray-700">Fecha Baja Movimiento: {new Date(movimiento.fechaBajaMovimiento).toLocaleString()}</p>
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-gray-700">
+                          <span className="font-semibold">Fecha Alta Movimiento:</span> {new Date(movimiento.fechaAltaMovimiento).toLocaleString()}
+                        </p>
                       </div>
                     </div>
                   </div>
                 ))
-              ) : <p>No hay movimientos registrados.</p>}
+              ) : (
+                <p className='text-sm font-medium text-zinc-700'>No hay movimientos registrados.</p>
+              )}
             </Card>
+
           </div>
         )}
       </Modal>
@@ -239,41 +242,76 @@ function Cuentas() {
       {/* Modal Crear Cuenta */}
       <Modal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title="Crear Nueva Cuenta" label="Ingrese los datos de la cuenta">
         <form className="pt-4" onSubmit={handleCrearCuenta}>
-          <div className='grid grid-cols-1 space-y-3'>
+          <div className="grid grid-cols-1 space-y-3">
             <Input
               label="Nombre de la Cuenta"
               type="text"
               value={nombreCuenta}
-              onChange={(e) => setNombreCuenta(e.target.value)}
+              placeholder="Ejemplo: Cuenta Principal"
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^[a-zA-Z\s]*$/.test(value)) {
+                  setNombreCuenta(value);
+                }
+              }}
             />
             <Input
               label="Nombre del Proveedor"
               type="text"
               value={nombreProveedor}
-              onChange={(e) => setNombreProveedor(e.target.value)}
+              placeholder="Ejemplo: Proveedor S.A."
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^[a-zA-Z\s.-]*$/.test(value)) {
+                  setNombreProveedor(value);
+                }
+              }}
             />
             <Input
               label="Número de Celular"
               type="text"
               value={numeroCelular}
-              onChange={(e) => setNumeroCelular(e.target.value)}
+              placeholder="Ejemplo: 1234567890"
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d*$/.test(value)) {
+                  setNumeroCelular(value);
+                }
+              }}
             />
             <Input
               label="Email del Proveedor"
               type="email"
               value={emailProveedor}
+              placeholder="Ejemplo: proveedor@email.com"
               onChange={(e) => setEmailProveedor(e.target.value)}
             />
             <Input
               label="Dirección del Proveedor"
               type="text"
               value={direccionProveedor}
-              onChange={(e) => setDireccionProveedor(e.target.value)}
+              placeholder="Ejemplo: Calle Falsa 123"
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^[a-zA-Z0-9\s,.-]*$/.test(value)) {
+                  setDireccionProveedor(value);
+                }
+              }}
             />
           </div>
           <div className="pt-5 justify-between flex space-x-10 w-full">
-            <Button label="Cancelar" onClick={() => setIsFormModalOpen(false)} color="red3" className="mt-3 w-full" />
-            <Button label="Guardar" type="submit" color="green" className="mt-3 w-full" />
+            <Button
+              label="Cancelar"
+              onClick={() => setIsFormModalOpen(false)}
+              color="neutral2"
+              className="mt-3 w-full"
+            />
+            <Button
+              label="Guardar"
+              type="submit"
+              color="green"
+              className="mt-3 w-full"
+            />
           </div>
         </form>
       </Modal>

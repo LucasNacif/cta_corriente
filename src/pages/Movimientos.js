@@ -5,7 +5,7 @@ import Button from '../components/Button';
 import Table from '../components/Table';
 import Input from '../components/Input';
 import Select from '../components/Select';
-import { Plus, Users, X } from 'lucide-react';
+import { Plus, Users, X, Eye, EyeClosed, Search, ArrowBigRight, ArrowBigLeft } from 'lucide-react';
 import { crearMovimiento, cambiarEstadoMovimiento, obtenerTodosMovimientos, obtenerMovimientoPorId, actualizarMovimiento } from '../api/movimientos.js';
 import { comprobanteApi } from '../api/comprobantes.js';
 
@@ -153,20 +153,25 @@ function Movimientos() {
       <td className="px-4 py-3">{movimiento.comentarioMovimiento}</td>
       <td className="px-4 py-3 text-center">${movimiento.importeMovimiento}</td>
       <td className="px-4 py-3 text-center">${movimiento.importePagado}</td>
-      <td className="px-4 py-3 text-center">{movimiento.medioPago}</td>
+      <td className="px-4 py-3 text-center">{movimiento.medioPago
+        .toLowerCase()
+        .replace(/_/g, " ")
+        .split(" ")
+        .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+        .join(" ")}</td>
       <td className="px-4 py-3 flex space-x-2 justify-end">
-        <Button label="Ver" onClick={() => handleVerMovimiento(movimiento.id)} color="neutral" />
+        <Button icon={Search} label="Ver" onClick={() => handleVerMovimiento(movimiento.id)} color="neutral2" />
 
         {tipo === 'activo' ? (
           <>
-            <Button label="Añadir Comprobante" color="blue" onClick={() => {
+            <Button icon={Plus} label="Comprobante" color="blue" onClick={() => {
               setMovimientoSeleccionado(movimiento);
               setIsFormModalOpenComp(true);
             }} />
-            <Button label="Baja" onClick={() => handleCambiarEstado(movimiento.id, 'baja')} color="red" />
+            <Button icon={EyeClosed} label="Baja" onClick={() => handleCambiarEstado(movimiento.id, 'baja')} color="red" />
           </>
         ) : (
-          <Button label="Alta" onClick={() => handleCambiarEstado(movimiento.id, 'alta')} color="green" />
+          <Button icon={Eye} label="Alta" onClick={() => handleCambiarEstado(movimiento.id, 'alta')} color="green" />
         )}
       </td>
     </>
@@ -264,10 +269,19 @@ function Movimientos() {
       <Table columns={columnas} data={movimientosBajaPaginados} renderRow={(mov) => renderRow(mov, 'baja')} />
 
       {/* Paginación */}
-      <div className="flex justify-between mt-4">
-        <Button label="Anterior" onClick={handlePreviousPage} disabled={page === 1} color="neutral" />
-        <span className="px-4 text-sm text-gray-600">Página {page}</span>
-        <Button label="Siguiente" onClick={handleNextPage} disabled={movimientos.length <= page * itemsPerPage} color="neutral" />
+      <div className="flex justify-end mt-4">
+        <Button
+          icon={ArrowBigLeft}
+          color="neutral2"
+          onClick={handlePreviousPage}
+          disabled={page === 1}
+        />
+        <span className="mx-7 flex items-center text-sm font-extralight">Página {page}</span>
+        <Button
+          icon={ArrowBigRight}
+          color="neutral2"
+          onClick={handleNextPage} disabled={movimientos.length <= page * itemsPerPage}
+        />
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalle Movimiento" icon={Users}>
@@ -275,7 +289,12 @@ function Movimientos() {
           <div>
             <p><strong>Comentario:</strong> {movimientoSeleccionado.comentarioMovimiento}</p>
             <p><strong>Importe:</strong> ${movimientoSeleccionado.importeMovimiento}</p>
-            <p><strong>Medio de Pago:</strong> {movimientoSeleccionado.medioPago}</p>
+            <p><strong>Medio de Pago:</strong> {movimientoSeleccionado.medioPago
+              .toLowerCase()
+              .replace(/_/g, " ")
+              .split(" ")
+              .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+              .join(" ")}</p>
           </div>
         ) : (
           <p>No hay información disponible para este movimiento.</p>
@@ -301,7 +320,7 @@ function Movimientos() {
       </Modal>
 
       <Modal isOpen={isFormModalComp} onClose={() => setIsFormModalOpenComp(false)} title="Nuevo Comprobante" icon={Plus}>
-      {errorModal && <p className="text-red-500 text-center">{errorModal}</p>}
+        {errorModal && <p className="text-red-500 text-center">{errorModal}</p>}
         <form onSubmit={handleAñadirComprobante}>
           <Select label="Tipo de Comprobante" options={tipoComprobanteOptions} value={tipoComprobante} onChange={(e) => setTipoComprobante(e.target.value)} />
           <Input label="Monto" type="number" value={montoComprobante} onChange={(e) => setMontoComprobante(e.target.value)} />
