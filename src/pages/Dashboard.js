@@ -6,7 +6,7 @@ import Table from '../components/Table';
 import AlertBadge from '../components/AlertBadge';
 import { obtenerTodosMovimientos } from '../api/movimientos';
 import { verCuentas } from '../api/cuentas';
-import { DollarSign, Users, CornerDownRight } from 'lucide-react';
+import { DollarSign, Users, CornerDownRight, X } from 'lucide-react';
 import Cookies from 'js-cookie';
 
 export default function Dashboard() {
@@ -124,6 +124,20 @@ export default function Dashboard() {
                     </div>
                 </Card>
             </div>
+
+            {error &&
+                <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
+                    <div className="bg-monza-700/80 text-monza-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
+                        <p className="text-sm">{error}</p>
+                        <button
+                            className="ml-auto flex items-center justify-center Ztext-white hover:bg-red-800 rounded-full px-1"
+                            onClick={() => setError(null)}
+                        >
+                            <X className='w-4' />
+                        </button>
+                    </div>
+                </div>
+            }
 
             {/* Tabla de Cuentas con Más Movimientos */}
             <div className="mt-4 mb-10 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
