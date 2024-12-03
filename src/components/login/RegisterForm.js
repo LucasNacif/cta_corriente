@@ -94,7 +94,7 @@ export default function RegisterForm() {
             }
 
             <div>
-                <label className="block text-gray-700">Nombre</label>
+                <label className="block text-black">Nombre</label>
                 <input
                     type="text"
                     name="name"
@@ -106,7 +106,7 @@ export default function RegisterForm() {
             </div>
 
             <div>
-                <label className="block text-gray-700">Apellido</label>
+                <label className="block text-black">Apellido</label>
                 <input
                     type="text"
                     name="surname"
@@ -118,7 +118,7 @@ export default function RegisterForm() {
             </div>
 
             <div>
-                <label className="block text-gray-700">Email</label>
+                <label className="block text-black">Email</label>
                 <input
                     type="email"
                     name="email"
@@ -130,7 +130,7 @@ export default function RegisterForm() {
             </div>
 
             <div>
-                <label className="block text-gray-700">CUIT</label>
+                <label className="block text-black">CUIT</label>
                 <input
                     type="text"
                     name="cuit"
@@ -142,7 +142,7 @@ export default function RegisterForm() {
             </div>
 
             <div>
-                <label className="block text-gray-700">Teléfono</label>
+                <label className="block text-black">Teléfono</label>
                 <input
                     type="text"
                     name="phone"
@@ -154,7 +154,7 @@ export default function RegisterForm() {
             </div>
 
             <div>
-                <label className="block text-gray-700">Contraseña</label>
+                <label className="block text-black">Contraseña</label>
                 <input
                     type="password"
                     name="password"
