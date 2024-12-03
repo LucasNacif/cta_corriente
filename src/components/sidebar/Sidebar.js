@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import SideLink from '../sidebar/SideLink';
-import { Home, ArrowLeftRight, Users, ReceiptText, LogOut } from 'lucide-react';
+import { Home, ArrowLeftRight, Users, LogOut } from 'lucide-react';
 
 const Sidebar = () => {
     const navigate = useNavigate();
@@ -39,9 +39,6 @@ const Sidebar = () => {
                         </li>
                         <li>
                             <SideLink to="/movimientos" icon={ArrowLeftRight}>Movimientos</SideLink>
-                        </li>
-                        <li>
-                            <SideLink to="/usocomponents" icon={ReceiptText}>Componentes Ej.</SideLink>
                         </li>
                     </ul>
                 </nav>

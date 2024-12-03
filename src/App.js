@@ -6,7 +6,6 @@ import Login from './pages/Login';
 import Cuentas from './pages/Cuentas';
 import Movimientos from './pages/Movimientos';
 import Dashboard from './pages/Dashboard';
-import Componentes from './pages/usosCompontes'
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
 const App = () => {
@@ -17,7 +16,6 @@ const App = () => {
                 <Route path="/dashboard" element={<ProtectedRoute><LayoutSidebar><Dashboard /></LayoutSidebar></ProtectedRoute>} />
                 <Route path="/cuentas" element={<ProtectedRoute><LayoutSidebar><Cuentas /></LayoutSidebar></ProtectedRoute>} />
                 <Route path="/movimientos" element={<ProtectedRoute><LayoutSidebar><Movimientos /></LayoutSidebar></ProtectedRoute>} />
-                <Route path="/usocomponents" element={<ProtectedRoute><LayoutSidebar><Componentes /></LayoutSidebar></ProtectedRoute>} />
             </Routes>
         </Router>
     );
