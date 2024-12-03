@@ -16,8 +16,9 @@ export default function RegisterForm() {
         phone: '',
         password: '',
     });
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState('');
+    const [error, setError] = useState(null); 
 
     useEffect(() => {
         if (Cookies.get('token')) {
@@ -25,32 +26,80 @@ export default function RegisterForm() {
         }
     }, [navigate]);
 
+    const validateField = (name, value) => {
+        let error = '';
+
+        switch (name) {
+            case 'name':
+            case 'surname':
+                if (!/^[A-Za-z\s]{2,50}$/.test(value)) {
+                    error = 'Debe contener solo letras y al menos 2 caracteres.';
+                }
+                break;
+
+            case 'email':
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    error = 'Formato de email inválido.';
+                }
+                break;
+
+            case 'cuit':
+                if (!/^\d{11}$/.test(value)) {
+                    error = 'El CUIT debe contener 11 números.';
+                }
+                break;
+
+            case 'phone':
+                if (!/^\d{10,15}$/.test(value)) {
+                    error = 'El teléfono debe contener entre 10 y 15 números.';
+                }
+                break;
+
+            case 'password':
+                if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/.test(value)) {
+                    error = 'La contraseña debe tener mínimo 8 caracteres, incluyendo letras, números y signos.';
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        setErrors((prev) => ({ ...prev, [name]: error }));
+
+        if (error) {
+            setError(error);
+        } else {
+            setError(null); 
+        }
+
+        return error === '';
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+        validateField(name, value);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
+        const valid = Object.keys(formData).every((key) =>
+            validateField(key, formData[key])
+        );
+
+        if (!valid) {
+            return;
+        }
 
         try {
-            const response = await LoginApi.register({
-                name: formData.name,
-                surname: formData.surname,
-                email: formData.email,
-                cuit: formData.cuit,
-                phone: formData.phone,
-                password: formData.password,
-            });
-
+            const response = await LoginApi.register(formData);
             setToken(response);
             setSuccess('Registro exitoso!');
             navigate('/dashboard');
         } catch (error) {
             console.error('Error al registrar:', error);
-            setError('Error en la solicitud: ' + (error.response?.data?.message || 'Inténtalo de nuevo.'));
+            setErrors({ general: 'Error en la solicitud: Inténtalo de nuevo.' });
         }
     };
 
@@ -63,10 +112,10 @@ export default function RegisterForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            {error &&
+            {/* Mensaje de error general flotante */}
+            {error && (
                 <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
-                    <div className="bg-monza-700 text-monza-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
-
+                    <div className="bg-monza-700/80 text-monza-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
                         <p className="text-sm">{error}</p>
                         <button
                             className="ml-auto flex items-center justify-center text-white hover:bg-red-800 rounded-full px-1"
@@ -76,23 +125,40 @@ export default function RegisterForm() {
                         </button>
                     </div>
                 </div>
-            }
+            )}
 
-            {success &&
+            {/* Mensaje de error general en el formulario */}
+            {errors.general && (
                 <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
-                    <div className="bg-emerald-700 text-emerald-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
-
-                        <p className="text-sm">{success}</p>
+                    <div className="bg-monza-700/80 text-monza-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
+                        <p className="text-sm">{errors.general}</p>
                         <button
-                            className="ml-auto flex items-center justify-center text-white hover:bg-emerald-800 rounded-full px-1"
+                            className="ml-auto flex items-center justify-center text-white hover:bg-red-800 rounded-full px-1"
                             onClick={() => setError(null)}
                         >
                             <X className='w-4' />
                         </button>
                     </div>
                 </div>
-            }
+            )}
 
+            {/* Mensaje de éxito */}
+            {success && (
+                <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
+                    <div className="bg-emerald-700 text-emerald-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
+                        <p className="text-sm">{success}</p>
+                        <button
+                            className="ml-auto flex items-center justify-center text-white hover:bg-emerald-800 rounded-full px-1"
+                            onClick={() => setSuccess(null)}
+                        >
+                            <X className="w-4" />
+                        </button>
+                    </div>
+                </div>
+            )}
+
+
+            {/* Campos de formulario */}
             <div>
                 <label className="block text-black">Nombre</label>
                 <input
@@ -164,6 +230,7 @@ export default function RegisterForm() {
                     className="w-full border border-gray-300 rounded p-2"
                 />
             </div>
+
 
             <button type="submit" className="bg-red-600 text-white rounded w-full py-2">
                 Registrarse

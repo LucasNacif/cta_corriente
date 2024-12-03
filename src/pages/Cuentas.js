@@ -222,12 +222,6 @@ function Cuentas() {
                           <p className="text-sm font-medium text-gray-700">
                             <span className="font-semibold ">Importe Pagado:</span> ${movimiento.importePagado}
                           </p>
-
-                          <p className="text-sm font-medium text-gray-700">
-                            <span className="font-semibold ">Importe Entregado:</span> ${(
-                              movimiento.importeMovimiento - movimiento.importePagado
-                            ).toFixed(2)}
-                          </p>
                           <p className="text-sm font-medium text-gray-700">
                             <span className="font-semibold mr-2">Estado:</span>
                             <AlertBadge value={estado} color={color} />
