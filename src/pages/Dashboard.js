@@ -28,7 +28,7 @@ export default function Dashboard() {
         const fetchCuentas = async () => {
             try {
                 const data = await verCuentas();
-                setCuentas(data); // Guardar las cuentas en el estado
+                setCuentas(Array.isArray(data) ? data : []); 
             } catch (error) {
                 setError('Error al obtener las cuentas');
                 console.error('Error al obtener las cuentas:', error);
@@ -53,15 +53,17 @@ export default function Dashboard() {
     );
 
     // Agrupar las cuentas por la cantidad de movimientos
-    const cuentasConMasMovimientos = cuentas.map((cuenta) => {
-        const movimientosCuenta = movimientos.filter(
-            (mov) => mov.cuentaId === cuenta.id
-        );
-        return {
-            cuentaNombre: cuenta.name,
-            cantidadMovimientos: movimientosCuenta.length,
-        };
-    });
+const cuentasConMasMovimientos = Array.isArray(cuentas)
+? cuentas.map((cuenta) => {
+    const movimientosCuenta = movimientos.filter(
+        (mov) => mov.cuentaId === cuenta.id
+    );
+    return {
+        cuentaNombre: cuenta.name,
+        cantidadMovimientos: movimientosCuenta.length,
+    };
+})
+: [];
 
     // Ordenar las cuentas por la cantidad de movimientos de mayor a menor
     const cuentasOrdenadas = cuentasConMasMovimientos
