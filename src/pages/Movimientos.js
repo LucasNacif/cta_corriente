@@ -214,10 +214,20 @@ function Movimientos() {
   );
 
 
-  const handleAñadirComprobante = async () => {
+  const handleAñadirComprobante = async (e) => {
+
+    e.preventDefault();
+
+    // Function to show and automatically hide error
+    const showErrorWithTimeout = (message) => {
+      setErrorModal(message);
+      setTimeout(() => {
+        setErrorModal(null);
+      }, 2000);
+    };
 
     if (!montoComprobante || montoComprobante === 0 || !descripcionComprobante || !fechaComprobante) {
-      setErrorModal('Debe completar todos los campos del comprobante.');
+      showErrorWithTimeout('Debe completar todos los campos del comprobante.');
       return;
     }
     try {
@@ -258,6 +268,9 @@ function Movimientos() {
           setMontoComprobante(0);
           setDescripcionComprobante('');
           setFechaComprobante('');
+          const data = await obtenerTodosMovimientos();
+          setMovimientos(data.filter((mov) => mov.isValid));
+          setMovimientosBaja(data.filter((mov) => !mov.isValid));
         }
       }
     } catch (error) {
@@ -365,7 +378,13 @@ function Movimientos() {
       </Modal>
 
       <Modal isOpen={isFormModalComp} onClose={() => setIsFormModalOpenComp(false)} title="Nuevo Comprobante" icon={Plus}>
-        {errorModal && <p className="text-red-500 text-center">{errorModal}</p>}
+        {errorModal &&
+          <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
+            <div className="bg-monza-700/80 text-monza-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
+              <p className="text-sm">{errorModal}</p>
+            </div>
+          </div>
+        }
         <form onSubmit={handleAñadirComprobante}>
           <Select label="Tipo de Comprobante" options={tipoComprobanteOptions} value={tipoComprobante} onChange={(e) => setTipoComprobante(e.target.value)} />
           <Input label="Monto" type="number" value={montoComprobante} onChange={(e) => setMontoComprobante(e.target.value)} />
