@@ -29,7 +29,6 @@ function Movimientos() {
   const [comentarioMovimiento, setComentario] = useState('');
   const [cuentaId, setCuentaId] = useState('');
 
-  const [page, setPage] = useState(1);
   const [itemsPerPage] = useState(3);
 
   const [montoComprobante, setMontoComprobante] = useState(0);
@@ -61,9 +60,13 @@ function Movimientos() {
       try {
         const data = await obtenerTodosMovimientos();
 
-        //obtengo las cuentas tambien para el select
         const cuentasData = await verCuentas();
-        setCuentas(Array.isArray(cuentasData) ? data : []);
+        if (Array.isArray(cuentasData) && cuentasData.length > 0) {
+          setCuentas(cuentasData);
+        } else {
+          setCuentas([]);
+          setError('No se encontraron cuentas disponibles.');
+        }
 
         if (data.length) {
           setMovimientos(data.filter((mov) => mov.isValid));
@@ -343,10 +346,11 @@ function Movimientos() {
       </Modal>
 
       <Modal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title="Nuevo Movimiento" icon={Users}>
-        <form onSubmit={handleCrearMovimiento}>
+        <form onSubmit={handleCrearMovimiento} className='space-y-3'>
           <Input label="Importe" type="number" value={importeMovimiento} onChange={(e) => setImporte(e.target.value)} />
           <Select label="Medio de Pago" options={mediosPagoOptions} value={medioPago} onChange={(e) => setMedioPago(e.target.value)} />
           <Input label="Comentario" type="text" value={comentarioMovimiento} onChange={(e) => setComentario(e.target.value)} />
+
           <Select
             label="Cuenta"
             options={cuentas && cuentas.length > 0 ? cuentas.map((cuenta) => ({
