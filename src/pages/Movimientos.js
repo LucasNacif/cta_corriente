@@ -237,35 +237,40 @@ function Movimientos() {
       console.log("Suma del importe nuevo y el viejo: ", parseInt(nuevoimportePagado));
       console.log("Es mayor? ", nuevoimportePagado > movimientoSeleccionado.importeMovimiento);
 
+      const nuevoComprobante = {
+        tipoComprobante,
+        descripcion: descripcionComprobante,
+        nroComprobante,
+        fechaComprobante,
+        montoComprobante: parseFloat(montoComprobante),
+        movimientoId: movimientoSeleccionado.id,
+      };
+
+      // Enviar el comprobante al backend
+      const responseComp = await comprobanteApi.save(nuevoComprobante);
+
+      if (!responseComp || responseComp.error) {
+        setErrorModal('Error al añadir un comprobante: ' + responseComp?.message || 'No hubo respuesta');
+        return;
+      }
 
       // Actualizar el movimiento en el backend
       const movimientoResponse = await actualizarMovimiento(movimientoSeleccionado.id, parseFloat(montoComprobante));
-
-      console.log(movimientoResponse);
-
-      if (movimientoResponse) {
-        const nuevoComprobante = {
-          tipoComprobante,
-          descripcion: descripcionComprobante,
-          nroComprobante,
-          fechaComprobante,
-          montoComprobante: parseFloat(montoComprobante),
-          movimientoId: movimientoSeleccionado.id,
-        };
-
-        // Enviar el comprobante al backend
-        const response = await comprobanteApi.save(nuevoComprobante);
-
-        if (response) {
-          setIsFormModalOpenComp(false);
-          setMontoComprobante(0);
-          setDescripcionComprobante('');
-          setFechaComprobante('');
-          const data = await obtenerTodosMovimientos();
-          setMovimientos(data.filter((mov) => mov.isValid));
-          setMovimientosBaja(data.filter((mov) => !mov.isValid));
-        }
+      if (!movimientoResponse) {
+        setErrorModal('Error al actualizar el movimiento.');
+        return;
       }
+
+      //si todo salio ok, se cierra el modal y se limpia to
+      setIsFormModalOpenComp(false);
+      setMontoComprobante(0);
+      setDescripcionComprobante('');
+      setFechaComprobante('');
+
+      const data = await obtenerTodosMovimientos();
+      setMovimientos(data.filter((mov) => mov.isValid));
+      setMovimientosBaja(data.filter((mov) => !mov.isValid));
+
     } catch (error) {
       setErrorModal('Error al añadir el comprobante.');
       console.error(error);

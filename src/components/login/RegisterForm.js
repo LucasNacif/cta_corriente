@@ -94,9 +94,11 @@ export default function RegisterForm() {
 
         try {
             const response = await LoginApi.register(formData);
-            setToken(response);
-            setSuccess('Registro exitoso!');
-            navigate('/dashboard');
+            if(response){
+                setToken(response);
+                navigate('/dashboard');
+            }
+            
         } catch (error) {
             console.error('Error al registrar:', error);
             setErrors({ general: 'Error en la solicitud: Inténtalo de nuevo.' });
