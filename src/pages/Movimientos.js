@@ -5,7 +5,7 @@ import Button from '../components/Button';
 import Table from '../components/Table';
 import Input from '../components/Input';
 import Select from '../components/Select';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, X } from 'lucide-react';
 import { crearMovimiento, cambiarEstadoMovimiento, obtenerTodosMovimientos, obtenerMovimientoPorId, actualizarMovimiento } from '../api/movimientos.js';
 import { comprobanteApi } from '../api/comprobantes.js';
 
@@ -237,11 +237,25 @@ function Movimientos() {
 
   return (
     <div className="p-4">
-      <h1 className="text-3xl font-bold text-center mb-6">Movimientos</h1>
-
-      {error && <p className="text-red-500 text-center">{error}</p>}
-
-      <Button label="Crear Movimiento" icon={Plus} onClick={() => setIsFormModalOpen(true)} color="green" />
+      <div className='flex justify-between'>
+        <h1 className="text-3xl font-bold text-center mb-2">Movimientos</h1>
+        <div>
+          <Button icon={Plus} label="Crear Movimiento" onClick={() => setIsFormModalOpen(true)} color="green" />
+        </div>
+      </div>
+      {error &&
+        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-monza-700/80 text-monza-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
+            <p className="text-sm">{error}</p>
+            <button
+              className="ml-auto flex items-center justify-center Ztext-white hover:bg-red-800 rounded-full px-1"
+              onClick={() => setError(null)}
+            >
+              <X className='w-4' />
+            </button>
+          </div>
+        </div>
+      }
 
       <p className="font-normal text-sm mt-4 pb-2">Movimientos Activos</p>
       <Table columns={columnas} data={movimientosActivosPaginados} renderRow={(mov) => renderRow(mov, 'activo')} />

@@ -115,7 +115,7 @@ function Cuentas() {
 
   const renderRow = (cuenta) => (
     <>
-      <td className="px-4 py-3 text-xs">{cuenta.name}</td>
+      <td className="px-4 py-3 text-sm">{cuenta.name}</td>
       <td className="px-4 py-3 text-sm">{cuenta.nombreProveedor}</td>
       <td className="px-4 py-3 text-center text-sm">{cuenta.numeroCelular}</td>
       <td className="px-4 py-3 text-sm">{cuenta.emailProveedor}</td>
@@ -144,7 +144,6 @@ function Cuentas() {
       {error &&
         <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50">
           <div className="bg-monza-700/80 text-monza-200 rounded-lg shadow-lg px-4 py-2 flex items-center space-x-4">
-            <span className="font-semibold">Error:</span>
             <p className="text-sm">{error}</p>
             <button
               className="ml-auto flex items-center justify-center Ztext-white hover:bg-red-800 rounded-full px-1"
