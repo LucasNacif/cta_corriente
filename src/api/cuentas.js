@@ -28,6 +28,7 @@ export const cambiarEstadoCuenta = async (idCuenta) => {
 export const verCuentas = async () => {
     try {
         const response = await api.get('/cuentas/ver-cuentas');
+        console.log(response)
         return response.data; 
     } catch (error) {
         console.error('Error al obtener las cuentas:', error.response?.data || error.message);

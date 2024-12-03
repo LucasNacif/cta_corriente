@@ -61,7 +61,7 @@ function Movimientos() {
 
         //obtengo las cuentas tambien para el select
         const cuentasData = await verCuentas();
-        setCuentas(cuentasData);
+        setCuentas(Array.isArray(cuentasData) ? data : []); 
 
         if (data.length) {
           setMovimientos(data.filter((mov) => mov.isValid));

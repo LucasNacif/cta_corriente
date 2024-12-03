@@ -31,7 +31,7 @@ function Cuentas() {
     const fetchCuentas = async () => {
       try {
         const data = await verCuentas();
-        setCuentas(data);
+        setCuentas(Array.isArray(data) ? data : []); 
       } catch (error) {
         setError('Error al obtener las cuentas');
       }
